@@ -78,7 +78,12 @@ class ProgressPage(Gtk.Box):
         self._log_scroll.set_child(self._log_label)
         self.append(self._log_scroll)
 
-
+        # ─── Per-package result cards ─────────────────────────
+        self._result_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        self._result_box.set_margin_top(16)
+        self._result_box.set_margin_bottom(8)
+        self._result_box.set_hexpand(True)
+        self.append(self._result_box)
 
     def start_installation(self, packages):
         """Begin installing the selected packages."""

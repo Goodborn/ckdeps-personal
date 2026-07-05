@@ -22,7 +22,6 @@ class CKDEPSApp(Adw.Application):
 
     def do_activate(self):
         """Create and show the main window."""
-        # Correct way to set dark theme in Libadwaita
         style_manager = Adw.StyleManager.get_default()
         style_manager.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
 
@@ -34,10 +33,6 @@ class CKDEPSApp(Adw.Application):
     def do_startup(self):
         """Called when the application starts."""
         Adw.Application.do_startup(self)
-
-        # Force dark theme via Adwaita's StyleManager (correct API)
-        style_manager = Adw.StyleManager.get_default()
-        style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
 
         # About action
         about_action = Gio.SimpleAction.new("about", None)

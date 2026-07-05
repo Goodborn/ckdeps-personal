@@ -44,19 +44,13 @@ AUR_PACKAGES = [
     Package("bolt-launcher", "Bolt Launcher", "RuneScape launcher", "applications-games", "Gaming", "aur", domain="runescape.com"),
     Package("haruna", "Haruna", "KDE media player", "haruna", "Media", "aur", domain="haruna.kde.org"),
     Package("popcorntime", "Popcorn Time", "Stream movies", "video-display", "Media", "aur", domain="popcorntime.app"),
-    Package("vmware-workstation", "VMware Workstation", "Virtual machine platform", "computer", "Development", "aur", domain="vmware.com"),
-    Package("vmware-keymaps", "VMware Keymaps", "Keyboard mappings for VMware", "input-keyboard", "Development", "aur", domain="vmware.com"),
     Package("qbittorrent", "qBittorrent", "BitTorrent client", "qbittorrent", "Networking", "aur", domain="qbittorrent.org"),
-    Package("vesktop", "Vesktop", "Custom Discord client", "internet-chat", "Communication", "aur", domain="discord.com"),
     Package("obs-studio", "OBS Studio", "Live streaming", "obs", "Media", "aur", domain="obsproject.com"),
     Package("visual-studio-code-bin", "VS Code", "Modern code editor", "visual-studio-code", "Development", "aur", domain="code.visualstudio.com"),
-    Package("proton-vpn-gtk-app", "Proton VPN", "Secure VPN application", "network-vpn", "Networking", "aur", domain="protonvpn.com"),
-    Package("harmonoid", "Harmonoid", "Beautiful music player", "multimedia-audio-player", "Media", "aur", domain="harmonoid.com"),
-    Package("brave-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "aur", domain="brave.com"),
-    Package("firefox", "Firefox", "Fast, private, and open-source web browser", "firefox", "Internet", "aur", domain="firefox.com"),
+    Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "aur", domain="brave.com"),
     Package("eden", "Eden", "Modern development tool", "applications-development", "Development", "aur", domain="github.com"),
     Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "aur", domain="kde.org"),
-    Package("sniffnet", "Sniffnet", "Network monitoring tool", "network-workgroup", "Networking", "aur", domain="github.com"),
+    Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "aur", domain="github.com"),
     Package("namida-bin", "Namida", "Beautiful music and video player", "multimedia-audio-player", "Media", "aur", domain="github.com"),
 ]
 
@@ -74,6 +68,8 @@ FLATPAK_PACKAGES = [
             flatpak_id="com.github.geigi.cozy"),
     Package("appflowy", "AppFlowy", "Open-source Notion alternative", "io.appflowy.AppFlowy", "Productivity", "flatpak", domain="appflowy.io",
             flatpak_id="io.appflowy.AppFlowy"),
+    Package("proton-vpn-gtk-app", "Proton VPN", "Secure VPN application", "network-vpn", "Networking", "flatpak", domain="protonvpn.com",
+            flatpak_id="com.protonvpn.www"),
 ]
 
 ALL_PACKAGES = AUR_PACKAGES + FLATPAK_PACKAGES

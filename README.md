@@ -83,12 +83,6 @@ After installing, you can launch the app anytime by:
 2. Searching for **"CKDEPS"** in your application menu.
 3. Running `make run` inside the project folder.
 
-### 📦 From AUR (Recommended)
-If you prefer using an AUR helper like `yay`:
-```bash
-yay -S ckdeps
-```
-
 ### 🛠️ Run from Source (Development)
 To test changes without installing to your system:
 ```bash
@@ -109,8 +103,6 @@ python3 -m ckdeps
 | `libadwaita` | GNOME design language |
 | `flatpak` | Flatpak package manager |
 | `pacman` | Arch package manager |
-
-**Optional:** `yay` or `paru` for AUR package installation.
 
 ---
 

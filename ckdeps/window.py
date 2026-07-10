@@ -214,6 +214,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._installer.run_extras(
             extras=self._selected_extras,
             installed_packages=installed_names,
+            newly_installed=[],
             on_extra_complete=self._on_extra_done,
             on_all_complete=self._on_all_extras_done,
         )
@@ -233,18 +234,24 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         ]
         installed_names = list(set(installed_names))
 
+        # Only newly installed this session (not already installed before)
+        newly_installed = [
+            p.name for p, s in package_results if s == "installed"
+        ]
+
         if self._selected_extras:
             self._installer.run_extras(
                 extras=self._selected_extras,
                 installed_packages=installed_names,
+                newly_installed=newly_installed,
                 on_extra_complete=self._on_extra_done,
                 on_all_complete=self._on_all_extras_done,
             )
         else:
-            # No extras, just Brave fix runs automatically
             self._installer.run_extras(
                 extras=[],
                 installed_packages=installed_names,
+                newly_installed=newly_installed,
                 on_extra_complete=self._on_extra_done,
                 on_all_complete=self._on_all_extras_done,
             )

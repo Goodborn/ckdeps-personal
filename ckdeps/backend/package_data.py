@@ -46,10 +46,8 @@ PACMAN_PACKAGES = [
     Package("atuin", "Atuin", "Magical shell history manager", "appointment-soon", "Terminal Tools", "pacman", domain=None),
     Package("zoxide", "Zoxide", "Smarter cd command", "folder", "Terminal Tools", "pacman", domain="github.com"),
     Package("bazaar", "Bazaar", "Version control system", "git", "Terminal Tools", "pacman", domain="gnu.org"),
-    Package("anydesk-bin", "AnyDesk", "Remote desktop", "preferences-desktop-remote-desktop", "Remote & Networking", "pacman", domain=None),
     Package("libreoffice-still", "LibreOffice", "Office suite", "libreoffice-main", "Productivity", "pacman", domain="libreoffice.org"),
     Package("betterbird", "Betterbird", "Email client", "mail-client", "Productivity", "pacman", domain="betterbird.eu"),
-    Package("popcorntime", "Popcorn Time", "Stream movies", "video-display", "Media", "pacman", domain="popcorntime.app"),
     Package("qbittorrent", "qBittorrent", "BitTorrent client", "qbittorrent", "Networking", "pacman", domain="qbittorrent.org"),
     Package("obs-studio", "OBS Studio", "Live streaming", "obs", "Media", "pacman", domain="obsproject.com"),
     Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "pacman", domain="brave.com"),
@@ -61,6 +59,8 @@ PACMAN_PACKAGES = [
 
 # ---------- Flatpak Packages ----------
 FLATPAK_PACKAGES = [
+    Package("anydesk", "AnyDesk", "Remote desktop", "com.anydesk.Anydesk", "Remote & Networking", "flatpak", domain="anydesk.com",
+            flatpak_id="com.anydesk.Anydesk"),
     Package("appflowy", "AppFlowy", "Open-source Notion alternative", "io.appflowy.AppFlowy", "Productivity", "flatpak", domain="appflowy.io",
             flatpak_id="io.appflowy.AppFlowy"),
     Package("blanket", "Blanket", "Ambient sound player", "com.rafaelmardojai.Blanket", "Media", "flatpak", domain=None,

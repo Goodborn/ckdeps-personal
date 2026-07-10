@@ -262,8 +262,11 @@ class Installer:
     # ─── Extras ──────────────────────────────────────────────────
 
     def run_extras(self, extras: list[ExtraConfig], installed_packages: list[str],
-                   on_extra_complete: Callable, on_all_complete: Callable):
+                   newly_installed: list[str] = None,
+                   on_extra_complete: Callable = None, on_all_complete: Callable = None):
         """Run selected configuration extras in background."""
+        if newly_installed is None:
+            newly_installed = []
         def _work():
             results = []
 
@@ -285,8 +288,8 @@ class Installer:
                 results.append((extra.title, result))
                 GLib.idle_add(on_extra_complete, extra.title, result)
 
-            # Bolt Launcher Java dependency
-            if "bolt-launcher" in installed_packages:
+            # Bolt Launcher Java dependency — only if bolt was newly installed this session
+            if "bolt-launcher" in newly_installed:
                 result = self._install_java()
                 results.append(("Java Runtime (Bolt)", result))
                 GLib.idle_add(on_extra_complete, "Java Runtime (Bolt)", result)

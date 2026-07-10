@@ -19,22 +19,51 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 ## 📋 Package List
 
-### AUR
-| eden | millennium | namida-bin | opencode-desktop-bin | popcorntime |
-|------|------------|------------|---------------------|-------------|
-| vm-curator-bin (installs qemu-full + sdl2) | visual-studio-code-bin | | | |
+### AUR (7)
+| Package | Description |
+|---------|-------------|
+| eden | Modern development tool |
+| millennium | Steam skin manager |
+| namida-bin | Beautiful music and video player |
+| opencode-desktop-bin | AI-powered coding assistant |
+| popcorntime | Stream movies |
+| vm-curator-bin | VM management tool |
+| visual-studio-code-bin | Modern code editor |
 
-### Pacman (Official)
-| thefuck | fzf | atuin | zoxide | bazaar |
-|---------|-----|-------|-------|--------|
-| libreoffice-still | betterbird | qbittorrent | obs-studio | brave-origin-bin |
-| kolourpaint | gpu-screen-recorder | openrgb | |
+> **Note:** `vm-curator-bin` also installs `qemu-full` and `sdl2` as dependencies.
 
-### Flatpak
-| AnyDesk | AppFlowy | Blanket | Bolt Launcher | Cozy |
-|---------|----------|---------|---------------|------|
-| Discord | Foliate | Haruna | Kdenlive | Proton VPN |
-| Readest | Upscayl | | | |
+### Pacman (Official) (12)
+| Package | Description |
+|---------|-------------|
+| thefuck | Corrects console commands |
+| fzf | Fuzzy finder for the terminal |
+| atuin | Magical shell history manager |
+| zoxide | Smarter cd command |
+| bazaar | Version control system |
+| libreoffice-still | Office suite |
+| betterbird | Email client |
+| qbittorrent | BitTorrent client |
+| obs-studio | Live streaming |
+| brave-origin-bin | Privacy-focused web browser |
+| kolourpaint | Easy-to-use paint program |
+| gpu-screen-recorder | Fastest GPU-accelerated screen recorder |
+| openrgb | RGB lighting control |
+
+### Flatpak (12)
+| Package | Description |
+|---------|-------------|
+| AnyDesk | Remote desktop |
+| AppFlowy | Open-source Notion alternative |
+| Blanket | Ambient sound player |
+| Bolt Launcher | RuneScape launcher |
+| Cozy | Audiobook player |
+| Discord | Messaging and voice chat |
+| Foliate | Modern e-book reader |
+| Haruna | KDE media player |
+| Kdenlive | Professional video editor |
+| Proton VPN | Secure VPN application |
+| Readest | Modern ebook reader |
+| Upscayl | AI image upscaler |
 
 ---
 

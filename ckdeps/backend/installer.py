@@ -288,8 +288,8 @@ class Installer:
                 results.append((extra.title, result))
                 GLib.idle_add(on_extra_complete, extra.title, result)
 
-            # Bolt Launcher Java dependency — only if bolt was newly installed this session
-            if "bolt-launcher" in newly_installed:
+            # Bolt Launcher Java dependency — only if bolt is installed AND java is missing
+            if "bolt-launcher" in installed_packages and not self.is_pacman_installed("jre-openjdk"):
                 result = self._install_java()
                 results.append(("Java Runtime (Bolt)", result))
                 GLib.idle_add(on_extra_complete, "Java Runtime (Bolt)", result)

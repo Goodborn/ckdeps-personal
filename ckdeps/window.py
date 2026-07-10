@@ -25,8 +25,8 @@ class CKDEPSWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app)
         self.set_title("CKDEPS")
-        self.set_default_size(960, 720)
-        self.set_size_request(800, 600)
+        self.set_default_size(900, 620)
+        self.set_size_request(750, 500)
         self.set_decorated(False)
         self.add_css_class("ckdeps-window")
 

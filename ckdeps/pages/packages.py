@@ -5,7 +5,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib, Pango
 
-from ..backend.package_data import ALL_PACKAGES, AUR_PACKAGES, FLATPAK_PACKAGES, CATEGORY_COLORS
+from ..backend.package_data import ALL_PACKAGES, AUR_PACKAGES, PACMAN_PACKAGES, FLATPAK_PACKAGES, CATEGORY_COLORS
 from ..backend.icon_loader import icon_loader
 
 
@@ -97,7 +97,7 @@ class PackagesPage(Gtk.Box):
         # ─── Navigation ──────────────────────────────
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)
-        nav_box.set_margin_top(16)
+        nav_box.set_margin_top(10)
 
         self._selected_label = Gtk.Label(label="0 selected")
         self._selected_label.add_css_class("page-subtitle")
@@ -105,20 +105,22 @@ class PackagesPage(Gtk.Box):
         self._selected_label.set_halign(Gtk.Align.START)
         nav_box.append(self._selected_label)
 
-        back_btn = Gtk.Button(label="  ←  Back  ")
+        back_btn = Gtk.Button(label="← Back")
         back_btn.add_css_class("nav-button")
         back_btn.connect("clicked", lambda _: self.on_back())
         nav_box.append(back_btn)
 
-        skip_btn = Gtk.Button(label="Skip")
-        skip_btn.add_css_class("nav-button")
-        skip_btn.connect("clicked", lambda _: self.on_continue([]))
-        nav_box.append(skip_btn)
+        self._skip_btn = Gtk.Button(label="Skip Installation")
+        self._skip_btn.add_css_class("nav-button-skip")
+        self._skip_btn.connect("clicked", lambda _: self.on_continue([]))
+        self._skip_btn.set_visible(True)
+        nav_box.append(self._skip_btn)
 
-        continue_btn = Gtk.Button(label="Install Selected  →")
-        continue_btn.add_css_class("nav-button-primary")
-        continue_btn.connect("clicked", self._on_continue_clicked)
-        nav_box.append(continue_btn)
+        self._continue_btn = Gtk.Button(label="Install Selected →")
+        self._continue_btn.add_css_class("nav-button-primary")
+        self._continue_btn.connect("clicked", self._on_continue_clicked)
+        self._continue_btn.set_sensitive(False)
+        nav_box.append(self._continue_btn)
 
         self.append(nav_box)
 
@@ -134,13 +136,15 @@ class PackagesPage(Gtk.Box):
         self._build_grid()
 
     def _build_grid(self):
-        """Build the package card grid grouping Terminal and Desktop apps."""
-        terminal_pkgs = [p for p in self._all_packages if p.category == "Terminal Tools"]
-        desktop_pkgs = [p for p in self._all_packages if p.category != "Terminal Tools"]
+        """Build the package card grid grouping by source type."""
+        aur_pkgs = [p for p in self._all_packages if p.source == "aur"]
+        pacman_pkgs = [p for p in self._all_packages if p.source == "pacman"]
+        flatpak_pkgs = [p for p in self._all_packages if p.source == "flatpak"]
 
         groups = [
-            ("Terminal & TUI Tools", terminal_pkgs),
-            ("Desktop Applications", desktop_pkgs)
+            ("AUR Packages", aur_pkgs),
+            ("Pacman (Official) Packages", pacman_pkgs),
+            ("Flatpak Packages", flatpak_pkgs),
         ]
 
         for title, pkgs in groups:
@@ -246,9 +250,10 @@ class PackagesPage(Gtk.Box):
         badge_row.set_hexpand(True)
         badge_row.set_valign(Gtk.Align.CENTER)
         
-        source_badge = Gtk.Label(label="AUR" if pkg.source == "aur" else "FLATPAK")
+        source_label = {"aur": "AUR", "pacman": "PACMAN", "flatpak": "FLATPAK"}.get(pkg.source, pkg.source.upper())
+        source_badge = Gtk.Label(label=source_label)
         source_badge.add_css_class("package-source-badge")
-        source_badge.add_css_class("badge-aur" if pkg.source == "aur" else "badge-flatpak")
+        source_badge.add_css_class(f"badge-{pkg.source}")
         source_badge.set_valign(Gtk.Align.CENTER)
         badge_row.append(source_badge)
 
@@ -319,9 +324,11 @@ class PackagesPage(Gtk.Box):
         self._update_selected_count()
 
     def _update_selected_count(self):
-        """Update the selected count label."""
+        """Update the selected count label and button states."""
         count = sum(1 for p in self._all_packages if p.selected)
         self._selected_label.set_text(f"{count} package{'s' if count != 1 else ''} selected")
+        self._continue_btn.set_sensitive(count > 0)
+        self._skip_btn.set_visible(count == 0)
 
     def _on_select_all(self, _btn):
         """Select all packages."""

@@ -15,7 +15,7 @@ window.ckdeps-window {
 }
 
 .custom-header {
-    padding: 12px 20px;
+    padding: 8px 16px;
     background: transparent;
 }
 
@@ -92,50 +92,50 @@ headerbar.ckdeps-header title {
 
 /* ─── Welcome Page ─────────────────────────────────── */
 .welcome-container {
-    padding: 48px;
+    padding: 24px;
 }
 
 .welcome-logo {
-    font-size: 72px;
+    font-size: 52px;
     font-weight: 900;
     color: #c084fc;
     text-shadow: 0 0 40px alpha(#a855f7, 0.5),
                  0 0 80px alpha(#7c3aed, 0.3);
-    margin-bottom: 8px;
-}
-
-.welcome-title {
-    font-size: 32px;
-    font-weight: 800;
-    color: #f0e7ff;
-    letter-spacing: 2px;
     margin-bottom: 4px;
 }
 
+.welcome-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #f0e7ff;
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+}
+
 .welcome-subtitle {
-    font-size: 16px;
+    font-size: 13px;
     color: alpha(#c4b5fd, 0.7);
     letter-spacing: 1px;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
 }
 
 .welcome-description {
-    font-size: 14px;
+    font-size: 12px;
     color: alpha(white, 0.6);
-    margin-bottom: 36px;
-    line-height: 1.6;
+    margin-bottom: 16px;
+    line-height: 1.5;
 }
 
 .personal-signature {
-    font-size: 11px;
+    font-size: 10px;
     font-style: italic;
     color: alpha(#c4b5fd, 0.4);
     letter-spacing: 1px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 .welcome-features {
-    margin-bottom: 36px;
+    margin-bottom: 16px;
 }
 
 .feature-card {
@@ -143,9 +143,9 @@ headerbar.ckdeps-header title {
         alpha(#a855f7, 0.08) 0%,
         alpha(#6366f1, 0.04) 100%);
     border: 1px solid alpha(#a855f7, 0.15);
-    border-radius: 16px;
-    padding: 20px;
-    margin: 6px;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 4px;
     transition: all 300ms ease;
 }
 
@@ -158,20 +158,20 @@ headerbar.ckdeps-header title {
 }
 
 .feature-icon {
-    font-size: 28px;
+    font-size: 22px;
     color: #c084fc;
-    margin-bottom: 8px;
-}
-
-.feature-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #e9d5ff;
     margin-bottom: 4px;
 }
 
-.feature-desc {
+.feature-title {
     font-size: 11px;
+    font-weight: 700;
+    color: #e9d5ff;
+    margin-bottom: 2px;
+}
+
+.feature-desc {
+    font-size: 10px;
     color: alpha(white, 0.5);
 }
 
@@ -179,16 +179,16 @@ headerbar.ckdeps-header title {
 .begin-button {
     background: linear-gradient(135deg, #a855f7, #6366f1);
     color: white;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1px;
-    padding: 14px 48px;
-    border-radius: 14px;
+    padding: 10px 36px;
+    border-radius: 12px;
     border: none;
     box-shadow: 0 4px 24px alpha(#a855f7, 0.4),
                 0 0 0 1px alpha(#a855f7, 0.2);
     transition: all 300ms ease;
-    min-width: 240px;
+    min-width: 200px;
 }
 
 .begin-button:hover {
@@ -205,26 +205,26 @@ headerbar.ckdeps-header title {
 
 /* ─── Page Common ──────────────────────────────────── */
 .page-container {
-    padding: 32px;
+    padding: 20px;
 }
 
 .page-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
     color: #f0e7ff;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .page-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: alpha(#c4b5fd, 0.6);
-    margin-bottom: 24px;
+    margin-bottom: 12px;
 }
 
 /* ─── Package Cards ────────────────────────────────── */
 .package-grid {
-    margin: 8px 0;
+    margin: 4px 0;
 }
 
 .package-card {
@@ -232,10 +232,10 @@ headerbar.ckdeps-header title {
         alpha(white, 0.04) 0%,
         alpha(white, 0.02) 100%);
     border: 1px solid alpha(white, 0.06);
-    border-radius: 14px;
-    padding: 10px 14px;
-    margin: 4px;
-    min-width: 200px;
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin: 2px;
+    min-width: 180px;
     transition: all 250ms ease;
 }
 
@@ -248,19 +248,19 @@ headerbar.ckdeps-header title {
 }
 
 .package-card.compact {
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: 8px;
     min-width: 140px;
 }
 
 .package-card.compact .package-name {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* ─── Detailed List Mode ───────────────────────────── */
 .layout-detailed .package-card {
-    margin: 2px 0;
-    padding: 12px 20px;
+    margin: 1px 0;
+    padding: 8px 14px;
 }
 
 .card-info-button {
@@ -296,24 +296,24 @@ headerbar.ckdeps-header title {
 }
 
 .package-name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #e9d5ff;
 }
 
 
 .package-desc {
-    font-size: 11px;
+    font-size: 10px;
     color: alpha(white, 0.45);
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 .package-source-badge {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 1px 6px;
+    border-radius: 5px;
 }
 
 .badge-aur {
@@ -328,25 +328,31 @@ headerbar.ckdeps-header title {
     border: 1px solid alpha(#0ea5e9, 0.2);
 }
 
+.badge-pacman {
+    background: alpha(#10b981, 0.15);
+    color: #34d399;
+    border: 1px solid alpha(#10b981, 0.2);
+}
+
 .installed-badge {
     background: alpha(#10b981, 0.15);
     color: #34d399;
     border: 1px solid alpha(#10b981, 0.2);
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 1px 6px;
+    border-radius: 5px;
 }
 
 /* ─── Category Header ──────────────────────────────── */
 .category-header {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: alpha(#c4b5fd, 0.5);
-    margin: 20px 0 8px 4px;
-    padding-bottom: 6px;
+    margin: 12px 0 4px 4px;
+    padding-bottom: 4px;
     border-bottom: 1px solid alpha(#a855f7, 0.1);
 }
 
@@ -356,9 +362,9 @@ headerbar.ckdeps-header title {
         alpha(white, 0.04) 0%,
         alpha(white, 0.02) 100%);
     border: 1px solid alpha(white, 0.06);
-    border-radius: 14px;
-    padding: 18px 20px;
-    margin: 6px 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 3px 0;
     transition: all 250ms ease;
 }
 
@@ -377,56 +383,56 @@ headerbar.ckdeps-header title {
 }
 
 .extra-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     color: #e0f2fe;
 }
 
 .extra-desc {
-    font-size: 12px;
+    font-size: 11px;
     color: alpha(white, 0.45);
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* ─── Progress Page ────────────────────────────────── */
 .progress-container {
-    padding: 40px;
+    padding: 24px;
 }
 
 .progress-overall-bar contents trough {
     background: alpha(white, 0.06);
-    border-radius: 8px;
-    min-height: 10px;
+    border-radius: 6px;
+    min-height: 8px;
 }
 
 .progress-overall-bar contents trough progress {
     background: linear-gradient(90deg, #a855f7, #6366f1, #0ea5e9);
-    border-radius: 8px;
-    min-height: 10px;
+    border-radius: 6px;
+    min-height: 8px;
 }
 
 .progress-status {
-    font-size: 13px;
+    font-size: 12px;
     color: alpha(white, 0.7);
-    margin: 12px 0;
-}
-
-.progress-current-pkg {
-    font-size: 18px;
-    font-weight: 800;
-    color: #c084fc;
     margin: 8px 0;
 }
 
+.progress-current-pkg {
+    font-size: 16px;
+    font-weight: 800;
+    color: #c084fc;
+    margin: 4px 0;
+}
+
 .progress-counter {
-    font-size: 42px;
+    font-size: 36px;
     font-weight: 900;
     color: #a855f7;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .progress-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: alpha(#c4b5fd, 0.6);
     letter-spacing: 2px;
@@ -437,42 +443,42 @@ headerbar.ckdeps-header title {
 .log-scroll {
     background: alpha(black, 0.3);
     border: 1px solid alpha(white, 0.05);
-    border-radius: 12px;
-    padding: 12px;
-    min-height: 150px;
+    border-radius: 10px;
+    padding: 8px;
+    min-height: 120px;
 }
 
 .log-text {
     font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: alpha(#10b981, 0.8);
 }
 
 /* ─── Summary Page ─────────────────────────────────── */
 .summary-container {
-    padding: 36px;
+    padding: 20px;
 }
 
 .summary-header {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 900;
     color: #f0e7ff;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .summary-subheader {
-    font-size: 13px;
+    font-size: 12px;
     color: alpha(#c4b5fd, 0.6);
-    margin-bottom: 28px;
+    margin-bottom: 12px;
 }
 
 .summary-section-title {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    margin: 16px 0 8px 0;
-    padding-bottom: 4px;
+    margin: 10px 0 4px 0;
+    padding-bottom: 3px;
     border-bottom: 1px solid alpha(white, 0.06);
 }
 
@@ -492,9 +498,9 @@ headerbar.ckdeps-header title {
 }
 
 .summary-item {
-    padding: 6px 12px;
-    border-radius: 8px;
-    margin: 2px 0;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin: 1px 0;
     transition: background 200ms ease;
 }
 
@@ -507,9 +513,9 @@ headerbar.ckdeps-header title {
         alpha(white, 0.04) 0%,
         alpha(white, 0.02) 100%);
     border: 1px solid alpha(white, 0.06);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 4px 0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 2px 0;
     transition: all 250ms ease;
 }
 
@@ -521,57 +527,57 @@ headerbar.ckdeps-header title {
 }
 
 .summary-status-icon {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 800;
-    min-width: 24px;
+    min-width: 20px;
 }
 
 .summary-token {
     background: alpha(white, 0.04);
     border: 1px solid alpha(white, 0.06);
-    border-radius: 8px;
-    padding: 6px 12px;
+    border-radius: 6px;
+    padding: 4px 8px;
 }
 
 .summary-pkg-name-compact {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     color: alpha(white, 0.7);
 }
 
 .summary-pkg-name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: alpha(white, 0.85);
 }
 
 .status-installed {
     color: #34d399;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .status-skipped {
     color: #38bdf8;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .status-failed {
     color: #f87171;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .status-success {
     color: #34d399;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
 }
 
 .status-exists {
     color: #fbbf24;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
 }
 
@@ -581,14 +587,14 @@ headerbar.ckdeps-header title {
         alpha(white, 0.04) 0%,
         alpha(white, 0.02) 100%);
     border: 1px solid alpha(white, 0.06);
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin: 4px;
-    min-width: 140px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 2px;
+    min-width: 120px;
 }
 
 .stat-number {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 900;
 }
 
@@ -598,7 +604,7 @@ headerbar.ckdeps-header title {
 .stat-number-extras { color: #fbbf24; }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     letter-spacing: 1px;
     color: alpha(white, 0.4);
@@ -610,10 +616,10 @@ headerbar.ckdeps-header title {
     background: alpha(white, 0.06);
     color: alpha(white, 0.8);
     border: 1px solid alpha(white, 0.08);
-    border-radius: 12px;
-    padding: 10px 28px;
+    border-radius: 10px;
+    padding: 8px 20px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 250ms ease;
 }
 
@@ -626,10 +632,10 @@ headerbar.ckdeps-header title {
     background: linear-gradient(135deg, #a855f7, #6366f1);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 10px 28px;
+    border-radius: 10px;
+    padding: 8px 20px;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     box-shadow: 0 2px 16px alpha(#a855f7, 0.3);
     transition: all 250ms ease;
 }
@@ -639,15 +645,38 @@ headerbar.ckdeps-header title {
     box-shadow: 0 4px 24px alpha(#a855f7, 0.4);
 }
 
+.nav-button-primary:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+}
+
+/* ─── Skip Button ──────────────────────────────────── */
+.nav-button-skip {
+    background: alpha(white, 0.04);
+    color: alpha(white, 0.5);
+    border: 1px solid alpha(white, 0.06);
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 250ms ease;
+}
+
+.nav-button-skip:hover {
+    background: alpha(white, 0.08);
+    border-color: alpha(white, 0.1);
+    color: alpha(white, 0.7);
+}
+
 /* ─── Select All / Deselect ────────────────────────── */
 .select-all-btn {
     background: alpha(#a855f7, 0.1);
     color: #c084fc;
     border: 1px solid alpha(#a855f7, 0.2);
-    border-radius: 10px;
-    padding: 6px 16px;
+    border-radius: 8px;
+    padding: 4px 12px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     transition: all 250ms ease;
 }
 
@@ -665,9 +694,9 @@ headerbar.ckdeps-header title {
 
 /* ─── Bootstrap Step ───────────────────────────────── */
 .bootstrap-step {
-    padding: 10px 16px;
-    border-radius: 10px;
-    margin: 4px 0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin: 2px 0;
     transition: all 250ms ease;
 }
 
@@ -687,7 +716,7 @@ headerbar.ckdeps-header title {
 }
 
 .step-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
 }
 
@@ -696,7 +725,7 @@ headerbar.ckdeps-header title {
 .step-title-pending { color: alpha(white, 0.35); }
 
 .step-status {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.5px;
 }
@@ -707,13 +736,13 @@ headerbar.ckdeps-header title {
         alpha(#f59e0b, 0.08) 0%,
         alpha(#f97316, 0.04) 100%);
     border: 1px solid alpha(#f59e0b, 0.15);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-top: 16px;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-top: 10px;
 }
 
 .tip-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #fcd34d;
     font-weight: 500;
 }
@@ -781,10 +810,10 @@ switch:checked {
 .finish-button {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
-    padding: 12px 40px;
-    border-radius: 14px;
+    padding: 8px 32px;
+    border-radius: 12px;
     border: none;
     box-shadow: 0 4px 24px alpha(#10b981, 0.3);
     transition: all 300ms ease;

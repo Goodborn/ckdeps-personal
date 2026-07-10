@@ -101,6 +101,7 @@ class Installer:
             if use_stdin:
                 process.stdin.write(self.sudo_password + "\n")
                 process.stdin.flush()
+                process.stdin.close()
 
             output_lines = []
             for line in iter(process.stdout.readline, ""):
@@ -212,6 +213,11 @@ class Installer:
                     ["sudo", "flatpak", "install", "-y", "flathub", pkg.flatpak_id],
                     on_output
                 )
+            elif pkg.source == "pacman":
+                success, _ = self._run_command(
+                    ["sudo", "pacman", "-S", "--needed", "--noconfirm", pkg.name],
+                    on_output
+                )
             else:
                 success, _ = self._run_command(
                     ["yay", "-S", "--needed", "--noconfirm", pkg.name],
@@ -247,6 +253,11 @@ class Installer:
                         ["sudo", "flatpak", "install", "-y", "flathub", pkg.flatpak_id],
                         on_output
                     )
+                elif pkg.source == "pacman":
+                    success, _ = self._run_command(
+                        ["sudo", "pacman", "-S", "--needed", "--noconfirm", pkg.name],
+                        on_output
+                    )
                 else:
                     success, _ = self._run_command(
                         ["yay", "-S", "--needed", "--noconfirm", pkg.name],
@@ -269,19 +280,12 @@ class Installer:
         def _work():
             results = []
 
-            # Always run Brave fix
-            brave_result = self._brave_kwallet_fix()
-            results.append(("Brave KWallet Fix", brave_result))
-            GLib.idle_add(on_extra_complete, "Brave KWallet Fix", brave_result)
-
             for extra in extras:
                 if self._cancel:
                     break
 
                 if extra.key == "aliases":
                     result = self._setup_aliases()
-                elif extra.key == "haruna_folders":
-                    result = self._setup_haruna(installed_packages)
                 elif extra.key == "disable_recent":
                     result = self._disable_recent_files()
                 elif extra.key == "performance_mode":
@@ -301,31 +305,6 @@ class Installer:
             GLib.idle_add(on_all_complete, results)
 
         self._run_in_thread(_work)
-
-    def _brave_kwallet_fix(self) -> tuple[str, str]:
-        """Apply Brave browser KWallet fix."""
-        home = Path.home()
-        # Check if Brave is installed
-        if not any(shutil.which(b) for b in ["brave", "brave-browser", "brave-beta"]):
-            return ("skipped", "Brave not detected")
-
-        b_flag = home / ".config" / "brave-flags.conf"
-        if (home / ".config" / "brave-beta-flags.conf").exists():
-            b_flag = home / ".config" / "brave-beta-flags.conf"
-
-        if b_flag.exists() and "--password-store=basic" in b_flag.read_text():
-            return ("exists", "Already configured")
-
-        b_flag.parent.mkdir(parents=True, exist_ok=True)
-        b_flag.write_text("--password-store=basic\n")
-
-        # Clear Local State
-        for variant in ["Brave-Browser", "Brave-Browser-Beta"]:
-            ls = home / ".config" / "BraveSoftware" / variant / "Local State"
-            if ls.exists():
-                ls.unlink()
-
-        return ("success", "Flag set & Local State cleared")
 
     def _setup_aliases(self) -> tuple[str, str]:
         """Set up custom aliases."""
@@ -353,18 +332,6 @@ class Installer:
                         )
 
         return ("success", "Aliases configured")
-
-    def _setup_haruna(self, installed: list[str]) -> tuple[str, str]:
-        """Create Haruna support directories."""
-        if "haruna" not in installed:
-            return ("skipped", "Haruna not installed")
-
-        h_dir = Path.home() / ".local" / "share" / "haruna"
-        if h_dir.exists():
-            return ("exists", "Folders already exist")
-
-        h_dir.mkdir(parents=True, exist_ok=True)
-        return ("success", "Folders created")
 
     def _setup_solaar(self, installed: list[str]) -> tuple[str, str]:
         """Add Solaar to Hyprland startup."""

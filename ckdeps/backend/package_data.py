@@ -12,7 +12,7 @@ class Package:
     description: str
     icon_name: str
     category: str
-    source: str  # "aur" or "flatpak"
+    source: str  # "aur", "pacman", or "flatpak"
     domain: Optional[str] = None
     flatpak_id: Optional[str] = None
     installed: bool = False
@@ -30,56 +30,66 @@ class ExtraConfig:
     status: str = ""
 
 
-# ---------- AUR / Pacman Packages ----------
+# ---------- AUR Packages ----------
 AUR_PACKAGES = [
-    Package("thefuck", "TheFuck", "Corrects console commands", "utilities-terminal", "Terminal Tools", "aur", domain="github.com"),
-    Package("fzf", "FZF", "Fuzzy finder for the terminal", "edit-find", "Terminal Tools", "aur", domain="github.com"),
-    Package("atuin", "Atuin", "Magical shell history manager", "appointment-soon", "Terminal Tools", "aur", domain=None),
-    Package("zoxide", "Zoxide", "Smarter cd command", "folder", "Terminal Tools", "aur", domain="github.com"),
-    Package("bazaar", "Bazaar", "Version control system", "git", "Terminal Tools", "aur", domain="gnu.org"),
-    Package("anydesk-bin", "AnyDesk", "Remote desktop", "preferences-desktop-remote-desktop", "Remote & Networking", "aur", domain=None),
-    Package("foliate", "Foliate", "Modern e-book reader", "x-office-document", "Productivity", "aur", domain=None),
-    Package("libreoffice-still", "LibreOffice", "Office suite", "libreoffice-main", "Productivity", "aur", domain="libreoffice.org"),
-    Package("betterbird", "Betterbird", "Email client", "mail-client", "Productivity", "aur", domain="betterbird.eu"),
-    Package("bolt-launcher", "Bolt Launcher", "RuneScape launcher", "applications-games", "Gaming", "aur", domain="runescape.com"),
-    Package("haruna", "Haruna", "KDE media player", "haruna", "Media", "aur", domain="haruna.kde.org"),
-    Package("popcorntime", "Popcorn Time", "Stream movies", "video-display", "Media", "aur", domain="popcorntime.app"),
-    Package("qbittorrent", "qBittorrent", "BitTorrent client", "qbittorrent", "Networking", "aur", domain="qbittorrent.org"),
-    Package("obs-studio", "OBS Studio", "Live streaming", "obs", "Media", "aur", domain="obsproject.com"),
-    Package("visual-studio-code-bin", "VS Code", "Modern code editor", "visual-studio-code", "Development", "aur", domain="code.visualstudio.com"),
-    Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "aur", domain="brave.com"),
     Package("eden", "Eden", "Modern development tool", "applications-development", "Development", "aur", domain="github.com"),
-    Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "aur", domain="kde.org"),
-    Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "aur", domain="github.com"),
+    Package("millennium", "Millennium", "Steam skin manager", "steam", "Gaming", "aur", domain="github.com"),
     Package("namida-bin", "Namida", "Beautiful music and video player", "multimedia-audio-player", "Media", "aur", domain="github.com"),
+    Package("opencode-desktop-bin", "OpenCode Desktop", "AI-powered coding assistant", "code", "Development", "aur", domain="github.com"),
+    Package("visual-studio-code-bin", "VS Code", "Modern code editor", "visual-studio-code", "Development", "aur", domain="code.visualstudio.com"),
+]
+
+# ---------- Pacman (Official) Packages ----------
+PACMAN_PACKAGES = [
+    Package("thefuck", "TheFuck", "Corrects console commands", "utilities-terminal", "Terminal Tools", "pacman", domain="github.com"),
+    Package("fzf", "FZF", "Fuzzy finder for the terminal", "edit-find", "Terminal Tools", "pacman", domain="github.com"),
+    Package("atuin", "Atuin", "Magical shell history manager", "appointment-soon", "Terminal Tools", "pacman", domain=None),
+    Package("zoxide", "Zoxide", "Smarter cd command", "folder", "Terminal Tools", "pacman", domain="github.com"),
+    Package("bazaar", "Bazaar", "Version control system", "git", "Terminal Tools", "pacman", domain="gnu.org"),
+    Package("anydesk-bin", "AnyDesk", "Remote desktop", "preferences-desktop-remote-desktop", "Remote & Networking", "pacman", domain=None),
+    Package("libreoffice-still", "LibreOffice", "Office suite", "libreoffice-main", "Productivity", "pacman", domain="libreoffice.org"),
+    Package("betterbird", "Betterbird", "Email client", "mail-client", "Productivity", "pacman", domain="betterbird.eu"),
+    Package("popcorntime", "Popcorn Time", "Stream movies", "video-display", "Media", "pacman", domain="popcorntime.app"),
+    Package("qbittorrent", "qBittorrent", "BitTorrent client", "qbittorrent", "Networking", "pacman", domain="qbittorrent.org"),
+    Package("obs-studio", "OBS Studio", "Live streaming", "obs", "Media", "pacman", domain="obsproject.com"),
+    Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "pacman", domain="brave.com"),
+    Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "pacman", domain="kde.org"),
+    Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "pacman", domain="github.com"),
+    Package("gpu-screen-recorder", "GPU Screen Recorder", "Fastest GPU-accelerated screen recorder", "video-display", "Media", "pacman", domain="git.dec05eba.com"),
 ]
 
 # ---------- Flatpak Packages ----------
 FLATPAK_PACKAGES = [
-    Package("spotify", "Spotify", "Music streaming service", "com.spotify.Client", "Media", "flatpak", domain="spotify.com",
-            flatpak_id="com.spotify.Client"),
-    Package("kdenlive", "Kdenlive", "Professional video editor", "org.kde.kdenlive", "Media", "flatpak", domain="kdenlive.org",
-            flatpak_id="org.kde.kdenlive"),
-    Package("upscayl", "Upscayl", "AI image upscaler", "org.upscayl.Upscayl", "Media", "flatpak", domain="upscayl.org",
-            flatpak_id="org.upscayl.Upscayl"),
-    Package("blanket", "Blanket", "Ambient sound player", "com.rafaelmardojai.Blanket", "Media", "flatpak", domain=None,
-            flatpak_id="com.rafaelmardojai.Blanket"),
-    Package("cozy", "Cozy", "Audiobook player", "com.github.geigi.cozy", "Media", "flatpak", domain=None,
-            flatpak_id="com.github.geigi.cozy"),
     Package("appflowy", "AppFlowy", "Open-source Notion alternative", "io.appflowy.AppFlowy", "Productivity", "flatpak", domain="appflowy.io",
             flatpak_id="io.appflowy.AppFlowy"),
+    Package("blanket", "Blanket", "Ambient sound player", "com.rafaelmardojai.Blanket", "Media", "flatpak", domain=None,
+            flatpak_id="com.rafaelmardojai.Blanket"),
+    Package("bolt-launcher", "Bolt Launcher", "RuneScape launcher", "com.adamcake.Bolt", "Gaming", "flatpak", domain="adamcake.com",
+            flatpak_id="com.adamcake.Bolt"),
+    Package("cozy", "Cozy", "Audiobook player", "com.github.geigi.cozy", "Media", "flatpak", domain=None,
+            flatpak_id="com.github.geigi.cozy"),
+    Package("discord", "Discord", "Messaging and voice chat", "com.discordapp.Discord", "Communication", "flatpak", domain="discord.com",
+            flatpak_id="com.discordapp.Discord"),
+    Package("foliate", "Foliate", "Modern e-book reader", "com.github.johnfactotum.Foliate", "Productivity", "flatpak", domain=None,
+            flatpak_id="com.github.johnfactotum.Foliate"),
+    Package("haruna", "Haruna", "KDE media player", "org.kde.haruna", "Media", "flatpak", domain="haruna.kde.org",
+            flatpak_id="org.kde.haruna"),
+    Package("kdenlive", "Kdenlive", "Professional video editor", "org.kde.kdenlive", "Media", "flatpak", domain="kdenlive.org",
+            flatpak_id="org.kde.kdenlive"),
     Package("proton-vpn-gtk-app", "Proton VPN", "Secure VPN application", "network-vpn", "Networking", "flatpak", domain="protonvpn.com",
             flatpak_id="com.protonvpn.www"),
+    Package("readest", "Readest", "Modern ebook reader", "com.bilingify.readest", "Productivity", "flatpak", domain=None,
+            flatpak_id="com.bilingify.readest"),
+    Package("upscayl", "Upscayl", "AI image upscaler", "org.upscayl.Upscayl", "Media", "flatpak", domain="upscayl.org",
+            flatpak_id="org.upscayl.Upscayl"),
 ]
 
-ALL_PACKAGES = AUR_PACKAGES + FLATPAK_PACKAGES
+ALL_PACKAGES = AUR_PACKAGES + PACMAN_PACKAGES + FLATPAK_PACKAGES
 
 # ---------- Extras ----------
 EXTRAS = [
     ExtraConfig("aliases", "Custom Aliases", "Install ~/CustomScripts/aliases.zsh with useful shortcuts",
                 "utilities-terminal"),
-    ExtraConfig("haruna_folders", "Haruna Folders", "Create playlist/resume support directories",
-                "folder-videos"),
     ExtraConfig("disable_recent", "Disable Recent Files", "Turn off GNOME recent file tracking for privacy",
                 "preferences-system-privacy"),
     ExtraConfig("performance_mode", "Performance Mode", "Set power profiles to performance (ideal for desktops)",

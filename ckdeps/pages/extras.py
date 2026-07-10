@@ -45,22 +45,6 @@ class ExtrasPage(Gtk.Box):
 
         self.append(extras_box)
 
-        # ─── Auto-applied note ───────────────────────
-        note = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        note.add_css_class("tip-bar")
-
-        tip_icon = Gtk.Label(label="💡")
-        note.append(tip_icon)
-
-        tip_text = Gtk.Label(
-            label="The Brave KWallet fix is applied automatically if Brave is detected."
-        )
-        tip_text.add_css_class("tip-text")
-        tip_text.set_wrap(True)
-        note.append(tip_text)
-
-        self.append(note)
-
         # ─── Navigation ──────────────────────────────
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)

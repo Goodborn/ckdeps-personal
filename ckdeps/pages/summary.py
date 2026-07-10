@@ -20,8 +20,8 @@ class SummaryPage(Gtk.Box):
         self._log = ""
 
         # ─── Hero Section ────────────────────────────
-        hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        hero_box.set_margin_bottom(24)
+        hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        hero_box.set_margin_bottom(12)
         hero_box.set_halign(Gtk.Align.CENTER)
         self.append(hero_box)
 
@@ -42,10 +42,10 @@ class SummaryPage(Gtk.Box):
 
         # ─── Stats Grid ──────────────────────────────
         self._stats_grid = Gtk.Grid()
-        self._stats_grid.set_column_spacing(16)
-        self._stats_grid.set_row_spacing(16)
+        self._stats_grid.set_column_spacing(8)
+        self._stats_grid.set_row_spacing(8)
         self._stats_grid.set_halign(Gtk.Align.CENTER)
-        self._stats_grid.set_margin_bottom(32)
+        self._stats_grid.set_margin_bottom(12)
         self._stats_grid.set_opacity(0)
         self.append(self._stats_grid)
 
@@ -76,14 +76,14 @@ class SummaryPage(Gtk.Box):
         self._scroll.set_vexpand(True)
         self._scroll.set_opacity(0)
 
-        self._results_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        self._results_box.set_margin_bottom(20)
+        self._results_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self._results_box.set_margin_bottom(12)
         self._scroll.set_child(self._results_box)
         self.append(self._scroll)
 
         # ─── Footer Section ──────────────────────────
-        footer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        footer_box.set_margin_top(20)
+        footer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        footer_box.set_margin_top(12)
         self.append(footer_box)
 
         # Close Button
@@ -196,7 +196,7 @@ class SummaryPage(Gtk.Box):
                 section_title.add_css_class("summary-section-title")
                 section_title.add_css_class(css)
                 section_title.set_halign(Gtk.Align.START)
-                section_title.set_margin_top(12)
+                section_title.set_margin_top(6)
                 self._results_box.append(section_title)
 
                 if self._layout_mode == "compact":
@@ -236,11 +236,11 @@ class SummaryPage(Gtk.Box):
             
             log_expander = Gtk.Expander()
             log_expander.set_label_widget(title_label)
-            log_expander.set_margin_top(16)
+            log_expander.set_margin_top(8)
             
             log_scroll = Gtk.ScrolledWindow()
             log_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            log_scroll.set_min_content_height(200)
+            log_scroll.set_min_content_height(150)
             log_scroll.add_css_class("log-scroll")
 
             buffer = Gtk.TextBuffer()

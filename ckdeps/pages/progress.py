@@ -108,6 +108,8 @@ class ProgressPage(Gtk.Box):
         display = pkg.display_name
         if pkg.source == "flatpak":
             display += " (Flatpak)"
+        elif pkg.source == "pacman":
+            display += " (Pacman)"
 
         self._current_pkg_label.set_text(display)
         self._status_label.set_text(f"Installing {display}...")
@@ -197,9 +199,10 @@ class ProgressPage(Gtk.Box):
         status_label.set_halign(Gtk.Align.END)
         right_box.append(status_label)
 
-        source_badge = Gtk.Label(label="AUR" if pkg.source == "aur" else "FLATPAK")
+        source_label = {"aur": "AUR", "pacman": "PACMAN", "flatpak": "FLATPAK"}.get(pkg.source, pkg.source.upper())
+        source_badge = Gtk.Label(label=source_label)
         source_badge.add_css_class("package-source-badge")
-        source_badge.add_css_class("badge-aur" if pkg.source == "aur" else "badge-flatpak")
+        source_badge.add_css_class(f"badge-{pkg.source}")
         source_badge.set_halign(Gtk.Align.END)
         right_box.append(source_badge)
 

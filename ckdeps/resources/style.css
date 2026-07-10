@@ -668,6 +668,26 @@ headerbar.ckdeps-header title {
     color: alpha(white, 0.7);
 }
 
+/* ─── Preview Arrow Button ──────────────────────────── */
+.preview-arrow-btn {
+    background: alpha(white, 0.04);
+    color: alpha(white, 0.4);
+    border: 1px solid alpha(white, 0.06);
+    border-radius: 8px;
+    padding: 2px 6px;
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 28px;
+    min-height: 28px;
+    transition: all 200ms ease;
+}
+
+.preview-arrow-btn:hover {
+    background: alpha(#a855f7, 0.15);
+    color: #c084fc;
+    border-color: alpha(#a855f7, 0.3);
+}
+
 /* ─── Select All / Deselect ────────────────────────── */
 .select-all-btn {
     background: alpha(#a855f7, 0.1);

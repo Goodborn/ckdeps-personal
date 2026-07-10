@@ -3,7 +3,7 @@
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, GLib
 
 from ckdeps.backend.package_data import EXTRAS, ExtraConfig
 
@@ -25,6 +25,11 @@ source ~/CustomScripts/aliases.fish
 # Command duration in right prompt (shows >500ms commands)
 """
 
+# Extras that have a preview to show
+PREVIEW_EXTRAS = {
+    "fish_config": FISH_CONFIG_PREVIEW,
+}
+
 
 class ExtrasPage(Gtk.Box):
     """Configuration extras selection page."""
@@ -40,6 +45,7 @@ class ExtrasPage(Gtk.Box):
         ) for e in EXTRAS]
         self._switches = {}
         self._preview_revealers = {}
+        self._arrow_buttons = {}
 
         # ─── Header ──────────────────────────────────
         title = Gtk.Label(label="System Configuration")
@@ -63,9 +69,9 @@ class ExtrasPage(Gtk.Box):
             card = self._create_extra_card(extra)
             wrapper.append(card)
 
-            # Add preview revealer for fish_config
-            if extra.key == "fish_config":
-                revealer = self._create_preview_revealer(FISH_CONFIG_PREVIEW)
+            # Add preview revealer if this extra has one
+            if extra.key in PREVIEW_EXTRAS:
+                revealer = self._create_preview_revealer(PREVIEW_EXTRAS[extra.key])
                 self._preview_revealers[extra.key] = revealer
                 wrapper.append(revealer)
 
@@ -97,7 +103,7 @@ class ExtrasPage(Gtk.Box):
 
     def _create_extra_card(self, extra: ExtraConfig):
         """Create a single extra configuration card."""
-        card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         card.add_css_class("extra-card")
 
         # Icon
@@ -123,7 +129,18 @@ class ExtrasPage(Gtk.Box):
 
         card.append(info_box)
 
-        # Switch
+        # Arrow button (for preview) — only if this extra has a preview
+        if extra.key in PREVIEW_EXTRAS:
+            arrow_btn = Gtk.Button(label="▾")
+            arrow_btn.add_css_class("nav-button")
+            arrow_btn.add_css_class("preview-arrow-btn")
+            arrow_btn.set_valign(Gtk.Align.CENTER)
+            arrow_btn.set_size_request(28, 28)
+            arrow_btn.connect("clicked", self._on_arrow_clicked, extra.key)
+            card.append(arrow_btn)
+            self._arrow_buttons[extra.key] = arrow_btn
+
+        # Switch (for enable/disable — independent of preview)
         switch = Gtk.Switch()
         switch.set_valign(Gtk.Align.CENTER)
         switch.connect("state-set", self._on_switch_toggled, extra, card)
@@ -168,18 +185,25 @@ class ExtrasPage(Gtk.Box):
         revealer_box._revealer = revealer
         return revealer_box
 
+    def _on_arrow_clicked(self, _btn, extra_key):
+        """Toggle preview visibility when arrow is clicked."""
+        if extra_key in self._preview_revealers:
+            revealer_box = self._preview_revealers[extra_key]
+            revealer = revealer_box._revealer
+            is_visible = revealer.get_reveal_child()
+            revealer.set_reveal_child(not is_visible)
+
+            # Rotate arrow
+            arrow_btn = self._arrow_buttons[extra_key]
+            arrow_btn.set_label("▴" if not is_visible else "▾")
+
     def _on_switch_toggled(self, switch, state, extra, card):
-        """Handle extra toggle."""
+        """Handle extra toggle — only controls selection, not preview."""
         extra.selected = state
         if state:
             card.add_css_class("selected")
         else:
             card.remove_css_class("selected")
-
-        # Toggle preview revealer if it exists
-        if extra.key in self._preview_revealers:
-            revealer_box = self._preview_revealers[extra.key]
-            revealer_box._revealer.set_reveal_child(state)
 
     def _on_apply_clicked(self, _btn):
         """Continue with selected extras."""

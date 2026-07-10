@@ -20,13 +20,15 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 ## 📋 Package List
 
 ### AUR
-| eden | millennium | namida-bin | opencode-desktop-bin | visual-studio-code-bin |
+| eden | millennium | namida-bin | opencode-desktop-bin | vm-curator-bin |
+|------|------------|------------|---------------------|----------------|
+| visual-studio-code-bin | | | | |
 
 ### Pacman (Official)
 | thefuck | fzf | atuin | zoxide | bazaar |
 |---------|-----|-------|-------|--------|
 | libreoffice-still | betterbird | qbittorrent | obs-studio | brave-origin-bin |
-| kolourpaint | vm-curator-bin | gpu-screen-recorder | openrgb | |
+| kolourpaint | gpu-screen-recorder | openrgb | |
 
 ### Flatpak
 | AnyDesk | AppFlowy | Blanket | Bolt Launcher | Cozy |

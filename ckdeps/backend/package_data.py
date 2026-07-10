@@ -36,6 +36,7 @@ AUR_PACKAGES = [
     Package("millennium", "Millennium", "Steam skin manager", "steam", "Gaming", "aur", domain="github.com"),
     Package("namida-bin", "Namida", "Beautiful music and video player", "multimedia-audio-player", "Media", "aur", domain="github.com"),
     Package("opencode-desktop-bin", "OpenCode Desktop", "AI-powered coding assistant", "code", "Development", "aur", domain="github.com"),
+    Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "aur", domain="github.com"),
     Package("visual-studio-code-bin", "VS Code", "Modern code editor", "visual-studio-code", "Development", "aur", domain="code.visualstudio.com"),
 ]
 
@@ -53,7 +54,6 @@ PACMAN_PACKAGES = [
     Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "pacman", domain="brave.com"),
     Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "pacman", domain="kde.org"),
     Package("openrgb", "OpenRGB", "RGB lighting control", "colorimeter", "Hardware", "pacman", domain="openrgb.org"),
-    Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "pacman", domain="github.com"),
     Package("gpu-screen-recorder", "GPU Screen Recorder", "Fastest GPU-accelerated screen recorder", "video-display", "Media", "pacman", domain="git.dec05eba.com"),
 ]
 

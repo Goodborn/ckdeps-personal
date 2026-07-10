@@ -1,5 +1,7 @@
 """Bootstrap page — system preparation with live progress."""
 
+import shutil
+import subprocess
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -12,7 +14,8 @@ BOOTSTRAP_STEPS = [
         "name": "System Update",
         "description": "Highly recommended before installing anything. "
                        "Ensures your system is up to date and avoids dependency conflicts.",
-        "icon": "system-software-update-symbolic",
+        "icon": "software-update-available-symbolic",
+        "glow_icon": "✦",
         "default": True,
     },
     {
@@ -20,7 +23,8 @@ BOOTSTRAP_STEPS = [
         "name": "Base Dependencies",
         "description": "Required for CKDEPS to work. Installs build tools, git, "
                        "and the Flatpak runtime needed by this app.",
-        "icon": "preferences-system-symbolic",
+        "icon": "emblem-system-symbolic",
+        "glow_icon": "⚙",
         "default": True,
     },
     {
@@ -28,7 +32,8 @@ BOOTSTRAP_STEPS = [
         "name": "Yay AUR Helper",
         "description": "Needed to install packages from the AUR (Arch User Repository). "
                        "Without this, AUR packages will be unavailable on the next page.",
-        "icon": "download-symbolic",
+        "icon": "folder-download-symbolic",
+        "glow_icon": "⬇",
         "default": True,
     },
     {
@@ -37,9 +42,39 @@ BOOTSTRAP_STEPS = [
         "description": "Needed to install Flatpak apps. Without this, "
                        "Flatpak packages will be unavailable on the next page.",
         "icon": "application-x-flatpak-symbolic",
+        "glow_icon": "◆",
         "default": True,
     },
 ]
+
+
+def _detect_installed():
+    """Detect what's already installed on the system."""
+    result = {}
+
+    # Check base deps: git, base-devel (makepkg), flatpak
+    result["base_deps"] = (
+        shutil.which("git") is not None
+        and shutil.which("makepkg") is not None
+        and shutil.which("flatpak") is not None
+    )
+
+    # Check yay
+    result["aur_helper"] = shutil.which("yay") is not None
+
+    # Check flathub remote
+    try:
+        out = subprocess.run(
+            ["flatpak", "remotes"], capture_output=True, text=True, timeout=5
+        )
+        result["flathub"] = "flathub" in out.stdout.lower()
+    except Exception:
+        result["flathub"] = False
+
+    # System update can't be detected
+    result["system_update"] = False
+
+    return result
 
 
 class BootstrapPage(Gtk.Box):
@@ -62,7 +97,7 @@ class BootstrapPage(Gtk.Box):
         self.append(title)
 
         subtitle = Gtk.Label(
-            label="Choose which steps to run — uncheck anything you've already done"
+            label="Choose which steps to run — detected items are pre-unchecked"
         )
         subtitle.add_css_class("page-subtitle")
         subtitle.set_halign(Gtk.Align.START)
@@ -114,25 +149,42 @@ class BootstrapPage(Gtk.Box):
 
         self.append(nav_box)
 
+        # ─── Auto-detect installed ───────────────────
+        GLib.idle_add(self._auto_detect)
+
     def _create_step_card(self, step, index):
-        """Create a single bootstrap step card matching extras style."""
+        """Create a single bootstrap step card with glow icon."""
         card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
         card.add_css_class("extra-card")
 
-        # Icon
-        icon = Gtk.Image.new_from_icon_name(step["icon"])
-        icon.set_pixel_size(32)
-        icon.set_opacity(0.7)
-        card.append(icon)
+        # Glow icon (emoji-based for theme matching)
+        icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        icon_box.set_valign(Gtk.Align.CENTER)
+
+        icon_label = Gtk.Label(label=step["glow_icon"])
+        icon_label.add_css_class("bootstrap-glow-icon")
+        icon_box.append(icon_label)
+
+        card.append(icon_box)
 
         # Info
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         info_box.set_hexpand(True)
 
+        # Title row with optional detected badge
+        title_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        title_row.set_halign(Gtk.Align.START)
+
         name_label = Gtk.Label(label=step["name"])
         name_label.add_css_class("extra-title")
-        name_label.set_halign(Gtk.Align.START)
-        info_box.append(name_label)
+        title_row.append(name_label)
+
+        detected_label = Gtk.Label(label="detected ✓")
+        detected_label.add_css_class("bootstrap-detected-badge")
+        detected_label.set_visible(False)
+        title_row.append(detected_label)
+
+        info_box.append(title_row)
 
         desc_label = Gtk.Label(label=step["description"])
         desc_label.add_css_class("extra-desc")
@@ -153,12 +205,26 @@ class BootstrapPage(Gtk.Box):
         self._step_rows.append({
             "card": card,
             "name": name_label,
-            "icon": icon,
+            "icon": icon_label,
+            "detected_badge": detected_label,
             "switch": switch,
             "key": step["key"],
         })
 
         return card
+
+    def _auto_detect(self):
+        """Check what's already installed and auto-uncheck."""
+        detected = _detect_installed()
+
+        for row_data in self._step_rows:
+            key = row_data["key"]
+            if detected.get(key, False):
+                row_data["switch"].set_active(False)
+                row_data["detected_badge"].set_visible(True)
+                row_data["card"].set_opacity(0.6)
+
+        return False
 
     def _on_switch_toggled(self, switch, state, step, card):
         """Handle step toggle."""
@@ -214,13 +280,16 @@ class BootstrapPage(Gtk.Box):
                 # Mark current as active
                 row_data["card"].remove_css_class("selected")
                 row_data["card"].add_css_class("bootstrap-step-active")
-                row_data["icon"].set_from_icon_name("emblem-synchronizing-symbolic")
+                row_data["icon"].set_text("⟳")
+                row_data["icon"].add_css_class("bootstrap-glow-icon-active")
                 continue
             if not found_current and row_data["card"].has_css_class("bootstrap-step-active"):
                 # Previous step done
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
+                row_data["icon"].set_text("✓")
+                row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
+                row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
     def _on_output(self, line):
         """Send output to global log."""
@@ -238,13 +307,16 @@ class BootstrapPage(Gtk.Box):
             if row_data["card"].has_css_class("bootstrap-step-active"):
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
+                row_data["icon"].set_text("✓")
+                row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
+                row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
         # Dim unchecked steps
         for row_data in self._step_rows:
             if not row_data["switch"].get_active():
                 row_data["card"].set_opacity(0.35)
-                row_data["icon"].set_from_icon_name("preferences-system-disabled-symbolic")
+                row_data["icon"].set_text("—")
+                row_data["icon"].add_css_class("bootstrap-glow-icon-dim")
 
         if not results:
             self._status_label.set_text("Bootstrap skipped")

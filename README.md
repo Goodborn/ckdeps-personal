@@ -106,52 +106,6 @@ python3 -m ckdeps
 
 ---
 
-## 📁 Project Structure
-
-```
-ckdeps-personal/
-├── ckdeps/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── main.py              # Application entry point
-│   ├── window.py            # Main window + page navigation
-│   ├── backend/
-│   │   ├── installer.py     # Threaded shell command execution
-│   │   ├── package_data.py  # Package & extras definitions
-│   │   └── icon_loader.py   # Async icon fetching
-│   ├── pages/
-│   │   ├── splash.py        # Splash screen
-│   │   ├── welcome.py       # Welcome page
-│   │   ├── bootstrap.py     # System preparation page
-│   │   ├── packages.py      # Package selection grid
-│   │   ├── extras.py        # System configuration extras
-│   │   ├── progress.py      # Live installation tracking
-│   │   └── summary.py       # Deployment report
-│   └── resources/
-│       └── style.css        # Premium dark theme CSS
-├── bin/
-│   └── ckdeps               # CLI entry point
-├── data/
-│   ├── com.goodborn.ckdeps.desktop
-│   ├── com.goodborn.ckdeps.svg
-│   └── com.goodborn.ckdeps.metainfo.xml
-├── Makefile                 # Install/uninstall targets
-├── PKGBUILD                 # AUR build recipe
-└── .SRCINFO                 # AUR metadata
-```
-
----
-
-## 🎨 Design
-
-- **Dark theme** with purple/blue gradient backgrounds
-- **Glassmorphism** effects with frosted glass cards
-- **Staggered fade-in** animations on page transitions
-- **Live log output** with monospace terminal styling
-- Custom scrollbars, switches, and checkboxes matching the theme
-
----
-
 ## 📄 License
 
 GPL-3.0-or-later — see [LICENSE](LICENSE) for details.

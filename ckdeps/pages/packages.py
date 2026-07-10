@@ -141,6 +141,12 @@ class PackagesPage(Gtk.Box):
 
     def _build_grid(self):
         """Build the package card grid grouping by source type."""
+        # Clear old grid content
+        child = self._grid_box.get_first_child()
+        while child:
+            self._grid_box.remove(child)
+            child = self._grid_box.get_first_child()
+
         aur_pkgs = [p for p in self._all_packages if p.source == "aur"]
         pacman_pkgs = [p for p in self._all_packages if p.source == "pacman"]
         flatpak_pkgs = [p for p in self._all_packages if p.source == "flatpak"]

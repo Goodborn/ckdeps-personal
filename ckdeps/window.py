@@ -176,8 +176,15 @@ class CKDEPSWindow(Adw.ApplicationWindow):
 
     def _go_to_packages(self):
         """Navigate to package selection page with bootstrap state."""
-        has_aur = self._bootstrap_page.has_aur_helper()
-        has_flatpak = self._bootstrap_page.has_flathub()
+        # Check if tools are available — either bootstrap was selected OR already installed
+        has_aur = (
+            self._bootstrap_page.has_aur_helper()
+            or self._installer.has_yay()
+        )
+        has_flatpak = (
+            self._bootstrap_page.has_flathub()
+            or self._installer.has_flatpak()
+        )
         self._stack.set_visible_child_name("packages")
         self._packages_page.load_status(has_aur=has_aur, has_flatpak=has_flatpak)
 

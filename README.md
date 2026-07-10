@@ -25,15 +25,14 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 ### Pacman (Official)
 | thefuck | fzf | atuin | zoxide | bazaar |
 |---------|-----|-------|-------|--------|
-| anydesk-bin | libreoffice-still | betterbird | popcorntime | qbittorrent |
-| obs-studio | brave-origin-bin | kolourpaint | vm-curator-bin | gpu-screen-recorder |
-| openrgb | | | | |
+| libreoffice-still | betterbird | qbittorrent | obs-studio | brave-origin-bin |
+| kolourpaint | vm-curator-bin | gpu-screen-recorder | openrgb | |
 
 ### Flatpak
-| AppFlowy | Blanket | Bolt Launcher | Cozy | Discord |
-|----------|---------|---------------|------|---------|
-| Foliate | Haruna | Kdenlive | Proton VPN | Readest |
-| Upscayl | | | | |
+| AnyDesk | AppFlowy | Blanket | Bolt Launcher | Cozy |
+|---------|----------|---------|---------------|------|
+| Discord | Foliate | Haruna | Kdenlive | Proton VPN |
+| Readest | Upscayl | | | |
 
 ---
 

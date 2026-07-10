@@ -10,33 +10,33 @@ BOOTSTRAP_STEPS = [
     {
         "key": "system_update",
         "name": "System Update",
-        "short": "Run pacman -Syu to update all packages",
         "description": "Highly recommended before installing anything. "
                        "Ensures your system is up to date and avoids dependency conflicts.",
+        "icon": "system-software-update-symbolic",
         "default": True,
     },
     {
         "key": "base_deps",
         "name": "Base Dependencies",
-        "short": "Install git, base-devel, and flatpak",
         "description": "Required for CKDEPS to work. Installs build tools, git, "
                        "and the Flatpak runtime needed by this app.",
+        "icon": "preferences-system-symbolic",
         "default": True,
     },
     {
         "key": "aur_helper",
         "name": "Yay AUR Helper",
-        "short": "Install yay to access AUR packages",
         "description": "Needed to install packages from the AUR (Arch User Repository). "
                        "Without this, AUR packages will be unavailable on the next page.",
+        "icon": "download-symbolic",
         "default": True,
     },
     {
         "key": "flathub",
         "name": "Flathub Repository",
-        "short": "Add the Flathub remote for Flatpak",
         "description": "Needed to install Flatpak apps. Without this, "
                        "Flatpak packages will be unavailable on the next page.",
+        "icon": "application-x-flatpak-symbolic",
         "default": True,
     },
 ]
@@ -51,7 +51,7 @@ class BootstrapPage(Gtk.Box):
         self.installer = installer
         self.on_complete = on_complete
         self._step_rows = []
-        self._checkboxes = {}
+        self._switches = {}
         self._step_keys = [s["key"] for s in BOOTSTRAP_STEPS]
         self._complete = False
 
@@ -69,12 +69,12 @@ class BootstrapPage(Gtk.Box):
         self.append(subtitle)
 
         # ─── Steps List ──────────────────────────────
-        steps_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        steps_box.set_margin_bottom(8)
+        steps_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        steps_box.set_vexpand(True)
 
         for i, step in enumerate(BOOTSTRAP_STEPS):
-            row = self._create_step_row(step, i)
-            steps_box.append(row)
+            card = self._create_step_card(step, i)
+            steps_box.append(card)
 
         self.append(steps_box)
 
@@ -96,92 +96,88 @@ class BootstrapPage(Gtk.Box):
 
         self.append(status_box)
 
-        # ─── Start / Continue Buttons ────────────────
-        btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        btn_box.set_halign(Gtk.Align.END)
+        # ─── Navigation ──────────────────────────────
+        nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        nav_box.set_halign(Gtk.Align.END)
+        nav_box.set_margin_top(8)
 
-        self._start_btn = Gtk.Button(label="Start Bootstrap →")
+        self._start_btn = Gtk.Button(label="Start Bootstrap  →")
         self._start_btn.add_css_class("nav-button-primary")
         self._start_btn.connect("clicked", lambda _: self.start_bootstrap())
-        btn_box.append(self._start_btn)
+        nav_box.append(self._start_btn)
 
-        self._continue_btn = Gtk.Button(label="Continue →")
+        self._continue_btn = Gtk.Button(label="Continue  →")
         self._continue_btn.add_css_class("nav-button-primary")
         self._continue_btn.set_visible(False)
         self._continue_btn.connect("clicked", lambda _: self.on_complete())
-        btn_box.append(self._continue_btn)
+        nav_box.append(self._continue_btn)
 
-        self.append(btn_box)
+        self.append(nav_box)
 
-    def _create_step_row(self, step, index):
-        """Create a bootstrap step row with checkbox."""
-        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        row.add_css_class("bootstrap-step")
-        row.add_css_class("bootstrap-step-pending")
+    def _create_step_card(self, step, index):
+        """Create a single bootstrap step card matching extras style."""
+        card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        card.add_css_class("extra-card")
 
-        # Checkbox
-        check = Gtk.CheckButton()
-        check.set_active(step["default"])
-        check.set_valign(Gtk.Align.CENTER)
-        row.append(check)
-        self._checkboxes[step["key"]] = check
-
-        # Step number
-        num = Gtk.Label(label=f"{index + 1}")
-        num.set_size_request(24, 24)
-        num.add_css_class("step-status")
-        row.append(num)
+        # Icon
+        icon = Gtk.Image.new_from_icon_name(step["icon"])
+        icon.set_pixel_size(32)
+        icon.set_opacity(0.7)
+        card.append(icon)
 
         # Info
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
+        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         info_box.set_hexpand(True)
 
         name_label = Gtk.Label(label=step["name"])
-        name_label.add_css_class("step-title")
-        name_label.add_css_class("step-title-pending")
+        name_label.add_css_class("extra-title")
         name_label.set_halign(Gtk.Align.START)
         info_box.append(name_label)
 
-        short_label = Gtk.Label(label=step["short"])
-        short_label.add_css_class("feature-desc")
-        short_label.set_halign(Gtk.Align.START)
-        info_box.append(short_label)
-
         desc_label = Gtk.Label(label=step["description"])
-        desc_label.add_css_class("package-desc")
+        desc_label.add_css_class("extra-desc")
         desc_label.set_halign(Gtk.Align.START)
         desc_label.set_wrap(True)
         info_box.append(desc_label)
 
-        row.append(info_box)
+        card.append(info_box)
 
-        # Status indicator
-        status = Gtk.Label(label="⏳")
-        status.add_css_class("step-status")
-        row.append(status)
+        # Switch
+        switch = Gtk.Switch()
+        switch.set_active(step["default"])
+        switch.set_valign(Gtk.Align.CENTER)
+        switch.connect("state-set", self._on_switch_toggled, step, card)
+        card.append(switch)
+        self._switches[step["key"]] = switch
 
         self._step_rows.append({
-            "row": row,
-            "title": name_label,
-            "status": status,
-            "num": num,
-            "check": check,
+            "card": card,
+            "name": name_label,
+            "icon": icon,
+            "switch": switch,
             "key": step["key"],
         })
 
-        return row
+        return card
+
+    def _on_switch_toggled(self, switch, state, step, card):
+        """Handle step toggle."""
+        if state:
+            card.add_css_class("selected")
+        else:
+            card.remove_css_class("selected")
 
     def get_selected_steps(self):
         """Return list of selected step keys."""
-        return [k for k, cb in self._checkboxes.items() if cb.get_active()]
+        return [k for k, sw in self._switches.items() if sw.get_active()]
 
     def has_aur_helper(self):
         """Check if AUR helper step is selected."""
-        return self._checkboxes.get("aur_helper", Gtk.CheckButton()).get_active()
+        return self._switches.get("aur_helper", Gtk.Switch()).get_active()
 
     def has_flathub(self):
         """Check if Flathub step is selected."""
-        return self._checkboxes.get("flathub", Gtk.CheckButton()).get_active()
+        return self._switches.get("flathub", Gtk.Switch()).get_active()
 
     def start_bootstrap(self):
         """Begin the bootstrap process for selected steps."""
@@ -191,9 +187,9 @@ class BootstrapPage(Gtk.Box):
             self._on_all_complete([])
             return
 
-        # Disable checkboxes and start button
-        for cb in self._checkboxes.values():
-            cb.set_sensitive(False)
+        # Disable switches and start button
+        for sw in self._switches.values():
+            sw.set_sensitive(False)
         self._start_btn.set_visible(False)
         self._spinner.set_spinning(True)
         self._spinner.set_visible(True)
@@ -210,28 +206,21 @@ class BootstrapPage(Gtk.Box):
         """Called when a new bootstrap step begins."""
         self._status_label.set_text(message)
 
-        # Find row index by key
-        idx = self._step_keys.index(step_key) if step_key in self._step_keys else -1
-
-        # Update previous step as done
+        # Find previous active step and mark done
+        found_current = False
         for row_data in self._step_rows:
             if row_data["key"] == step_key:
-                break
-            if row_data["row"].has_css_class("bootstrap-step-active"):
-                row_data["row"].remove_css_class("bootstrap-step-active")
-                row_data["row"].add_css_class("bootstrap-step-done")
-                row_data["title"].remove_css_class("step-title-active")
-                row_data["title"].add_css_class("step-title-done")
-                row_data["status"].set_text("✓")
-
-        # Mark current step as active
-        if 0 <= idx < len(self._step_rows):
-            current = self._step_rows[idx]
-            current["row"].remove_css_class("bootstrap-step-pending")
-            current["row"].add_css_class("bootstrap-step-active")
-            current["title"].remove_css_class("step-title-pending")
-            current["title"].add_css_class("step-title-active")
-            current["status"].set_text("⚙️")
+                found_current = True
+                # Mark current as active
+                row_data["card"].remove_css_class("selected")
+                row_data["card"].add_css_class("bootstrap-step-active")
+                row_data["icon"].set_from_icon_name("emblem-synchronizing-symbolic")
+                continue
+            if not found_current and row_data["card"].has_css_class("bootstrap-step-active"):
+                # Previous step done
+                row_data["card"].remove_css_class("bootstrap-step-active")
+                row_data["card"].add_css_class("bootstrap-step-done")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
 
     def _on_output(self, line):
         """Send output to global log."""
@@ -246,18 +235,16 @@ class BootstrapPage(Gtk.Box):
 
         # Mark any active step as done
         for row_data in self._step_rows:
-            if row_data["row"].has_css_class("bootstrap-step-active"):
-                row_data["row"].remove_css_class("bootstrap-step-active")
-                row_data["row"].add_css_class("bootstrap-step-done")
-                row_data["title"].remove_css_class("step-title-active")
-                row_data["title"].add_css_class("step-title-done")
-                row_data["status"].set_text("✓")
+            if row_data["card"].has_css_class("bootstrap-step-active"):
+                row_data["card"].remove_css_class("bootstrap-step-active")
+                row_data["card"].add_css_class("bootstrap-step-done")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
 
-        # Skip unchecked steps visually
+        # Dim unchecked steps
         for row_data in self._step_rows:
-            if not row_data["check"].get_active():
-                row_data["status"].set_text("—")
-                row_data["title"].set_opacity(0.4)
+            if not row_data["switch"].get_active():
+                row_data["card"].set_opacity(0.35)
+                row_data["icon"].set_from_icon_name("preferences-system-disabled-symbolic")
 
         if not results:
             self._status_label.set_text("Bootstrap skipped")

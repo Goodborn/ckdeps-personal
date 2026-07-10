@@ -701,18 +701,17 @@ headerbar.ckdeps-header title {
 }
 
 .bootstrap-step-active {
-    background: alpha(#a855f7, 0.08);
-    border-left: 3px solid #a855f7;
+    background: linear-gradient(145deg,
+        alpha(#a855f7, 0.1) 0%,
+        alpha(#6366f1, 0.05) 100%);
+    border-color: alpha(#a855f7, 0.3);
 }
 
 .bootstrap-step-done {
-    background: alpha(#10b981, 0.06);
-    border-left: 3px solid #10b981;
-}
-
-.bootstrap-step-pending {
-    background: alpha(white, 0.02);
-    border-left: 3px solid alpha(white, 0.08);
+    background: linear-gradient(145deg,
+        alpha(#10b981, 0.08) 0%,
+        alpha(#10b981, 0.03) 100%);
+    border-color: alpha(#10b981, 0.25);
 }
 
 .step-title {

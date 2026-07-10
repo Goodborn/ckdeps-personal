@@ -12,22 +12,21 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 ## ✨ Features
 
-| 📦 **Smart Packages** | Personalized list of AUR + Flatpak apps |
+| 📦 **Smart Packages** | Personalized list of AUR + Pacman + Flatpak apps |
 | ⚡ **One-Click Bootstrap** | Automates system updates and manager setup |
-| 🎨 **Personal Tweaks** | Custom aliases, startup apps, and app configs |
+| 🎨 **Personal Tweaks** | Custom aliases, recent files, and performance mode |
 | 📊 **Live Progress** | Real-time installation tracking with log output |
 
 ## 📋 Package List
 
-### AUR / Pacman
-thefuck, fzf, atuin, zoxide, bazaar, hyprsunset, anydesk-bin, foliate,
-libreoffice-still, betterbird, bolt-launcher, haruna, popcorntime,
-vmware-workstation, vmware-keymaps, qbittorrent, vesktop, obs-studio,
-visual-studio-code-bin, proton-vpn-gtk-app, harmonoid, brave-bin, firefox, eden,
-kolourpaint, sniffnet, namida-bin
+### AUR
+eden, millennium, namida-bin, opencode-desktop-bin, visual-studio-code-bin
+
+### Pacman (Official)
+thefuck, fzf, atuin, zoxide, bazaar, anydesk-bin, libreoffice-still, betterbird, popcorntime, qbittorrent, obs-studio, brave-origin-bin, kolourpaint, vm-curator-bin, gpu-screen-recorder
 
 ### Flatpak
-Spotify, Kdenlive, Upscayl, Blanket, Cozy, AppFlowy
+AppFlowy, Blanket, Bolt Launcher, Cozy, Discord, Foliate, Haruna, Kdenlive, Proton VPN, Readest, Upscayl
 
 ---
 
@@ -81,25 +80,28 @@ python3 -m ckdeps
 ## 📁 Project Structure
 
 ```
-ckdeps/
+ckdeps-personal/
 ├── ckdeps/
-│   ├── __init__.py          # CKDEPS — A personal initial (fresh install) app to get CachyOS KDE ready.
+│   ├── __init__.py
+│   ├── __main__.py
 │   ├── main.py              # Application entry point
 │   ├── window.py            # Main window + page navigation
 │   ├── backend/
 │   │   ├── installer.py     # Threaded shell command execution
-│   │   └── package_data.py  # Package & extras definitions
+│   │   ├── package_data.py  # Package & extras definitions
+│   │   └── icon_loader.py   # Async icon fetching
 │   ├── pages/
-│   │   ├── welcome.py       # A personal initial (fresh install) app to my liking to get CachyOS KDE ready for my personal use.
+│   │   ├── splash.py        # Splash screen
+│   │   ├── welcome.py       # Welcome page
 │   │   ├── bootstrap.py     # System preparation page
 │   │   ├── packages.py      # Package selection grid
-│   │   ├── extras.py        # Configuration extras
+│   │   ├── extras.py        # System configuration extras
 │   │   ├── progress.py      # Live installation tracking
 │   │   └── summary.py       # Deployment report
 │   └── resources/
 │       └── style.css        # Premium dark theme CSS
 ├── bin/
-│   └── ckdeps     # CLI entry point
+│   └── ckdeps               # CLI entry point
 ├── data/
 │   ├── com.goodborn.ckdeps.desktop
 │   ├── com.goodborn.ckdeps.svg

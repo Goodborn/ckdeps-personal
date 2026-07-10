@@ -141,12 +141,6 @@ class BootstrapPage(Gtk.Box):
         self._start_btn.connect("clicked", lambda _: self.start_bootstrap())
         nav_box.append(self._start_btn)
 
-        self._continue_btn = Gtk.Button(label="Continue  →")
-        self._continue_btn.add_css_class("nav-button-primary")
-        self._continue_btn.set_visible(False)
-        self._continue_btn.connect("clicked", lambda _: self.on_complete())
-        nav_box.append(self._continue_btn)
-
         self.append(nav_box)
 
         # ─── Auto-detect installed ───────────────────
@@ -329,5 +323,6 @@ class BootstrapPage(Gtk.Box):
                 failed = [n for n, s in results if not s]
                 self._status_label.set_text(f"⚠ Some steps had issues: {', '.join(failed)}")
 
-        self._continue_btn.set_visible(True)
         self._complete = True
+        # Auto-advance to packages after brief pause
+        GLib.timeout_add(1200, self.on_complete)

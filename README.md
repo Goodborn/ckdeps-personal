@@ -22,7 +22,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 ### AUR
 | eden | millennium | namida-bin | opencode-desktop-bin | popcorntime |
 |------|------------|------------|---------------------|-------------|
-| vm-curator-bin | visual-studio-code-bin | | | |
+| vm-curator-bin (installs qemu-full + sdl2) | visual-studio-code-bin | | | |
 
 ### Pacman (Official)
 | thefuck | fzf | atuin | zoxide | bazaar |

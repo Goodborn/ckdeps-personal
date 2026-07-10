@@ -13,6 +13,11 @@ from gi.repository import GLib
 
 from .package_data import Package, ExtraConfig
 
+# Dependencies that need to be installed alongside certain packages
+PACKAGE_DEPENDENCIES = {
+    "vm-curator-bin": ["qemu-full", "sdl2"],
+}
+
 
 class Installer:
     """Manages package installation and system configuration in background threads."""
@@ -254,6 +259,17 @@ class Installer:
                 status = "installed" if success else "failed"
                 GLib.idle_add(on_package_complete, pkg, status, i, len(packages))
                 results.append((pkg, status))
+
+                # Install dependencies if package was installed successfully
+                if success and pkg.name in PACKAGE_DEPENDENCIES:
+                    for dep in PACKAGE_DEPENDENCIES[pkg.name]:
+                        GLib.idle_add(on_output, f"Installing dependency: {dep}")
+                        dep_success, _ = self._run_command(
+                            ["sudo", "pacman", "-S", "--needed", "--noconfirm", dep],
+                            on_output
+                        )
+                        if not dep_success:
+                            GLib.idle_add(on_output, f"Warning: failed to install dependency {dep}")
 
             GLib.idle_add(on_all_complete, results)
 

@@ -54,6 +54,7 @@ PACMAN_PACKAGES = [
     Package("obs-studio", "OBS Studio", "Live streaming", "obs", "Media", "pacman", domain="obsproject.com"),
     Package("brave-origin-bin", "Brave Browser", "Privacy-focused web browser", "brave-browser", "Internet", "pacman", domain="brave.com"),
     Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "pacman", domain="kde.org"),
+    Package("openrgb", "OpenRGB", "RGB lighting control", "colorimeter", "Hardware", "pacman", domain="openrgb.org"),
     Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "pacman", domain="github.com"),
     Package("gpu-screen-recorder", "GPU Screen Recorder", "Fastest GPU-accelerated screen recorder", "video-display", "Media", "pacman", domain="git.dec05eba.com"),
 ]

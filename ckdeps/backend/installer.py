@@ -296,29 +296,170 @@ class Installer:
     def _setup_aliases(self) -> tuple[str, str]:
         """Set up custom aliases."""
         home = Path.home()
-        alias_file = home / "CustomScripts" / "aliases.zsh"
+        alias_file = home / "CustomScripts" / "aliases.fish"
 
         if alias_file.exists():
             return ("exists", "File already exists")
 
         alias_file.parent.mkdir(parents=True, exist_ok=True)
         alias_file.write_text(
-            "alias update='yay -Syu'\nalias weather='curl wttr.in'\n"
+            """# Weather function (defaults to Gjilan unless a location is provided)
+function weather
+    set -l location Gjilan
+
+    if test (count $argv) -gt 0
+        set location $argv[1]
+    end
+
+    curl "wttr.in/$location"
+end
+
+######################################################
+
+alias ls='eza --icons --group-directories-first --grid'
+
+######################################################
+
+# Update system (yay -Syu)
+function system_update
+    sudo pacman -Syu
+end
+
+function aur_update
+    yay -Syu
+end
+
+######################################################
+
+# App removal function (yay -Rns)
+function remove
+    if test (count $argv) -eq 0
+        set_color red
+        echo "Usage: remove <package>"
+        set_color normal
+        return 1
+    end
+
+    set -l pkg $argv[1]
+
+    set_color blue
+    echo "Removing package: $pkg..."
+    set_color normal
+
+    yay -Rns "$pkg"
+    or return 1
+
+    set_color green
+    echo "Package removed: $pkg"
+    set_color normal
+
+    echo
+    set_color blue
+    echo "Post-removal cleanup options:"
+    set_color normal
+    echo "  [1] Remove orphaned dependencies (yay -Yc)"
+    echo "  [2] Clean package cache (sudo paccache -r)"
+    echo "  [3] Remove user leftovers (~/.config, ~/.cache, ~/.local/share)"
+    echo "  [Enter] Do nothing"
+    echo
+
+    read -P "Choose options (e.g. 1 2 3): " choices
+
+    if test -z "$choices"
+        set_color green
+        echo "No cleanup performed."
+        set_color normal
+        return 0
+    end
+
+    for choice in $choices
+        switch $choice
+
+            case 1
+                set_color blue
+                echo "Removing orphaned dependencies..."
+                set_color normal
+                yay -Yc
+
+            case 2
+                set_color blue
+                echo "Cleaning package cache..."
+                set_color normal
+                sudo paccache -r
+
+            case 3
+                set_color blue
+                echo "Checking leftovers for: $pkg"
+                set_color normal
+
+                set -l found 0
+
+                set -l dirs \\
+                    "$HOME/.config/$pkg" \\
+                    "$HOME/.cache/$pkg" \\
+                    "$HOME/.local/share/$pkg"
+
+                for dir in $dirs
+                    if test -e "$dir"
+                        set_color yellow
+                        echo "Found: $dir"
+                        set_color normal
+                        set found 1
+                    end
+                end
+
+                if test $found -eq 1
+                    read -P "Remove these directories? [y/N]: " confirm
+
+                    if string match -qr '^[Yy]$' -- $confirm
+                        for dir in $dirs
+                            if test -e "$dir"
+                                rm -rf "$dir"
+                            end
+                        end
+
+                        set_color green
+                        echo "Leftovers removed."
+                        set_color normal
+                    end
+                else
+                    set_color green
+                    echo "No leftovers found."
+                    set_color normal
+                end
+
+            case '*'
+                set_color red
+                echo "Unknown option: $choice"
+                set_color normal
+        end
+    end
+
+    set_color green
+    echo "Done."
+    set_color normal
+end
+
+######################################################
+
+# Edit this file, reload it, and show aliases (if mylist exists)
+alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/aliases.fish; and functions -q mylist; and mylist'
+"""
         )
 
-        # Source in shell configs
-        for rc_name in [".bashrc", ".zshrc"]:
-            rc = home / rc_name
-            if rc.exists():
-                content = rc.read_text()
-                if "aliases.zsh" not in content:
-                    with open(rc, "a") as f:
-                        f.write(
-                            "\n[[ -f ~/CustomScripts/aliases.zsh ]] && "
-                            "source ~/CustomScripts/aliases.zsh\n"
-                        )
+        # Source in fish config
+        fish_config = home / ".config" / "fish" / "config.fish"
+        if fish_config.exists():
+            content = fish_config.read_text()
+            if "aliases.fish" not in content:
+                with open(fish_config, "a") as f:
+                    f.write(
+                        "\n# CKDEPS aliases\n"
+                        "test -f ~/CustomScripts/aliases.fish && "
+                        "source ~/CustomScripts/aliases.fish\n"
+                    )
 
-        return ("success", "Aliases configured")
+        return ("success", "Fish aliases configured")
 
     def _setup_solaar(self, installed: list[str]) -> tuple[str, str]:
         """Add Solaar to Hyprland startup."""

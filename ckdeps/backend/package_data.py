@@ -89,7 +89,7 @@ ALL_PACKAGES = AUR_PACKAGES + PACMAN_PACKAGES + FLATPAK_PACKAGES
 
 # ---------- Extras ----------
 EXTRAS = [
-    ExtraConfig("aliases", "Custom Aliases", "Install ~/CustomScripts/aliases.zsh with useful shortcuts",
+    ExtraConfig("aliases", "Custom Aliases", "Install ~/CustomScripts/aliases.fish with weather, ls, update, and remove functions",
                 "utilities-terminal"),
     ExtraConfig("disable_recent", "Disable Recent Files", "Turn off GNOME recent file tracking for privacy",
                 "preferences-system-privacy"),

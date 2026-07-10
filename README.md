@@ -102,7 +102,3 @@ python3 -m ckdeps
 ## 📄 License
 
 GPL-3.0-or-later — see [LICENSE](LICENSE) for details.
-
----
-
-**Made with 💜 by Goodborn**

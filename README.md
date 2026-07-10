@@ -10,13 +10,6 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 ---
 
-## ✨ Features
-
-| 📦 **Smart Packages** | Personalized list of AUR + Pacman + Flatpak apps |
-| ⚡ **One-Click Bootstrap** | Automates system updates and manager setup |
-| 🎨 **Personal Tweaks** | Custom Fish aliases, shell config, recent files, and performance mode |
-| 📊 **Live Progress** | Real-time installation tracking with log output |
-
 ## 📋 Package List
 
 ### AUR (7)

@@ -143,11 +143,12 @@ class ExtrasPage(Gtk.Box):
         revealer.set_transition_duration(300)
         revealer.set_reveal_child(False)
 
+        inner_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+
         preview_label = Gtk.Label(label="Preview — will be added to config.fish:")
         preview_label.add_css_class("package-desc")
         preview_label.set_halign(Gtk.Align.START)
-        preview_label.set_margin_bottom(4)
-        revealer.append(preview_label)
+        inner_box.append(preview_label)
 
         # Code block
         code_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -159,7 +160,8 @@ class ExtrasPage(Gtk.Box):
         code_label.set_selectable(True)
         code_box.append(code_label)
 
-        revealer.append(code_box)
+        inner_box.append(code_box)
+        revealer.set_child(inner_box)
         revealer_box.append(revealer)
 
         # Store revealer reference on the box for toggling

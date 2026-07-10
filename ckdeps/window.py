@@ -157,10 +157,9 @@ class CKDEPSWindow(Adw.ApplicationWindow):
     # ─── Page Navigation ──────────────────────────────
 
     def _go_to_bootstrap(self, password):
-        """Show the bootstrap page and start it."""
-        self._terminal_log = "" # Reset log
+        """Show the bootstrap page."""
+        self._terminal_log = ""
         self._installer.sudo_password = password
-        self._bootstrap_page.start_bootstrap()
         self._stack.set_visible_child_name("bootstrap")
 
     def _go_back_to_welcome(self):
@@ -176,9 +175,11 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._terminal_log += line + "\n"
 
     def _go_to_packages(self):
-        """Navigate to package selection page."""
+        """Navigate to package selection page with bootstrap state."""
+        has_aur = self._bootstrap_page.has_aur_helper()
+        has_flatpak = self._bootstrap_page.has_flathub()
         self._stack.set_visible_child_name("packages")
-        self._packages_page.load_status()
+        self._packages_page.load_status(has_aur=has_aur, has_flatpak=has_flatpak)
 
     def _go_to_extras(self, selected_packages):
         """Navigate to extras page."""

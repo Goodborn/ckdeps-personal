@@ -128,73 +128,60 @@ class Installer:
 
     # ─── Bootstrap ───────────────────────────────────────────────
 
-    def bootstrap_system(self, on_step: Callable, on_output: Callable,
-                         on_complete: Callable):
-        """Run full system bootstrap in background."""
+    def bootstrap_system(self, selected_steps: list[str], on_step: Callable,
+                         on_output: Callable, on_complete: Callable):
+        """Run selected bootstrap steps in background."""
         def _work():
-            steps = []
+            results = []
+            step_map = {
+                "system_update": ("System Update", ["sudo", "pacman", "-Syu", "--noconfirm"]),
+                "base_deps": ("Base Dependencies", ["sudo", "pacman", "-S", "--needed", "--noconfirm",
+                              "git", "base-devel", "flatpak"]),
+            }
 
-            # Step 1: System update
-            GLib.idle_add(on_step, "Updating system packages...", 0)
-            success, _ = self._run_command(
-                ["sudo", "pacman", "-Syu", "--noconfirm"], on_output
-            )
-            steps.append(("System Update", success))
+            for key in selected_steps:
+                if self._cancel:
+                    break
 
-            if self._cancel:
-                GLib.idle_add(on_complete, steps)
-                return
+                if key == "aur_helper":
+                    GLib.idle_add(on_step, "Installing yay AUR helper...", key)
+                    if self.has_yay():
+                        results.append(("Yay AUR Helper", True))
+                    else:
+                        import tempfile
+                        tmpdir = tempfile.mkdtemp()
+                        success, _ = self._run_command(
+                            ["git", "clone", "https://aur.archlinux.org/yay.git",
+                             os.path.join(tmpdir, "yay")], on_output
+                        )
+                        if success:
+                            success, _ = self._run_command(
+                                ["bash", "-c",
+                                 f"cd {os.path.join(tmpdir, 'yay')} && makepkg -si --noconfirm"],
+                                on_output
+                            )
+                        results.append(("Yay AUR Helper", success))
+                        try:
+                            import shutil as sh
+                            sh.rmtree(tmpdir, ignore_errors=True)
+                        except Exception:
+                            pass
 
-            # Step 2: Base dependencies
-            GLib.idle_add(on_step, "Installing base dependencies...", 1)
-            success, _ = self._run_command(
-                ["sudo", "pacman", "-S", "--needed", "--noconfirm",
-                 "git", "base-devel", "flatpak"], on_output
-            )
-            steps.append(("Base Dependencies", success))
-
-            if self._cancel:
-                GLib.idle_add(on_complete, steps)
-                return
-
-            # Step 3: Install yay if missing
-            if not self.has_yay():
-                GLib.idle_add(on_step, "Installing yay AUR helper...", 2)
-                import tempfile
-                tmpdir = tempfile.mkdtemp()
-                success, _ = self._run_command(
-                    ["git", "clone", "https://aur.archlinux.org/yay.git",
-                     os.path.join(tmpdir, "yay")], on_output
-                )
-                if success:
+                elif key == "flathub":
+                    GLib.idle_add(on_step, "Adding Flathub repository...", key)
                     success, _ = self._run_command(
-                        ["bash", "-c",
-                         f"cd {os.path.join(tmpdir, 'yay')} && makepkg -si --noconfirm"],
-                        on_output
+                        ["flatpak", "remote-add", "--if-not-exists", "flathub",
+                         "https://flathub.org/repo/flathub.flatpakrepo"], on_output
                     )
-                steps.append(("Yay AUR Helper", success))
-                try:
-                    import shutil as sh
-                    sh.rmtree(tmpdir, ignore_errors=True)
-                except Exception:
-                    pass
-            else:
-                GLib.idle_add(on_step, "Yay AUR helper already installed", 2)
-                steps.append(("Yay AUR Helper", True))
+                    results.append(("Flathub Repository", success))
 
-            if self._cancel:
-                GLib.idle_add(on_complete, steps)
-                return
+                elif key in step_map:
+                    name, cmd = step_map[key]
+                    GLib.idle_add(on_step, f"Running {name}...", key)
+                    success, _ = self._run_command(cmd, on_output)
+                    results.append((name, success))
 
-            # Step 4: Enable Flathub
-            GLib.idle_add(on_step, "Enabling Flathub repository...", 3)
-            success, _ = self._run_command(
-                ["flatpak", "remote-add", "--if-not-exists", "flathub",
-                 "https://flathub.org/repo/flathub.flatpakrepo"], on_output
-            )
-            steps.append(("Flathub Repository", success))
-
-            GLib.idle_add(on_complete, steps)
+            GLib.idle_add(on_complete, results)
 
         self._run_in_thread(_work)
 

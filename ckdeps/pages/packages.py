@@ -21,6 +21,8 @@ class PackagesPage(Gtk.Box):
         self._cards = {}  # pkg.name -> (card_widget, check_button)
         self._all_packages = list(ALL_PACKAGES)  # Make copies
         self._layout_mode = "compact"  # Default to compact
+        self._has_aur = True
+        self._has_flatpak = True
         for pkg in self._all_packages:
             pkg.selected = False
 
@@ -124,8 +126,10 @@ class PackagesPage(Gtk.Box):
 
         self.append(nav_box)
 
-    def load_status(self):
+    def load_status(self, has_aur=True, has_flatpak=True):
         """Check installation status of all packages."""
+        self._has_aur = has_aur
+        self._has_flatpak = has_flatpak
         self.installer.check_all_status(self._all_packages, self._on_status_loaded)
 
     def _on_status_loaded(self, packages):
@@ -142,20 +146,31 @@ class PackagesPage(Gtk.Box):
         flatpak_pkgs = [p for p in self._all_packages if p.source == "flatpak"]
 
         groups = [
-            ("AUR Packages", aur_pkgs),
-            ("Pacman (Official) Packages", pacman_pkgs),
-            ("Flatpak Packages", flatpak_pkgs),
+            ("AUR Packages", aur_pkgs, self._has_aur),
+            ("Pacman (Official) Packages", pacman_pkgs, True),
+            ("Flatpak Packages", flatpak_pkgs, self._has_flatpak),
         ]
 
-        for title, pkgs in groups:
+        for title, pkgs, available in groups:
             if not pkgs:
                 continue
 
             # Section Header
+            header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+            header_box.set_halign(Gtk.Align.START)
+
             header = Gtk.Label(label=title.upper())
             header.add_css_class("category-header")
             header.set_halign(Gtk.Align.START)
-            self._grid_box.append(header)
+            header_box.append(header)
+
+            if not available:
+                notice = Gtk.Label(label="(unavailable — complete bootstrap step first)")
+                notice.add_css_class("package-desc")
+                notice.set_halign(Gtk.Align.START)
+                header_box.append(notice)
+
+            self._grid_box.append(header_box)
 
             # Flow box for cards
             flow = Gtk.FlowBox()
@@ -178,7 +193,7 @@ class PackagesPage(Gtk.Box):
 
             for i, pkg in enumerate(pkgs):
                 try:
-                    card = self._create_package_card(pkg)
+                    card = self._create_package_card(pkg, available=available)
                     card.set_visible(True)
                     flow.append(card)
                 except Exception as e:
@@ -187,19 +202,23 @@ class PackagesPage(Gtk.Box):
             flow.set_visible(True)
             self._grid_box.append(flow)
 
-    def _create_package_card(self, pkg):
+    def _create_package_card(self, pkg, available=True):
         """Create a single compact package card widget with animated description revealer."""
 
         card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         card.add_css_class("package-card")
         if pkg.installed:
             card.add_css_class("installed")
+        if not available:
+            card.set_opacity(0.35)
+            card.set_sensitive(False)
 
         # Checkbox
         check = Gtk.CheckButton()
-        check.set_active(pkg.selected)
+        check.set_active(pkg.selected if available else False)
         check.set_valign(Gtk.Align.START)
-        check.set_margin_top(4)  # Align with text baseline
+        check.set_margin_top(4)
+        check.set_sensitive(available)
         check.connect("toggled", self._on_package_toggled, pkg, card)
         card.append(check)
 

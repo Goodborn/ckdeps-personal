@@ -7,6 +7,24 @@ from gi.repository import Gtk, Adw
 
 from ckdeps.backend.package_data import EXTRAS, ExtraConfig
 
+FISH_CONFIG_PREVIEW = """# Starship prompt
+starship init fish | source
+
+# The Fuck (fk command)
+thefuck --alias fk | source
+
+# Atuin shell history
+atuin init fish | source
+
+# Zoxide smart cd
+zoxide init fish | source
+
+# Custom aliases (weather, ls, update, remove)
+source ~/CustomScripts/aliases.fish
+
+# Command duration in right prompt (shows >500ms commands)
+"""
+
 
 class ExtrasPage(Gtk.Box):
     """Configuration extras selection page."""
@@ -21,6 +39,7 @@ class ExtrasPage(Gtk.Box):
             icon_name=e.icon_name
         ) for e in EXTRAS]
         self._switches = {}
+        self._preview_revealers = {}
 
         # ─── Header ──────────────────────────────────
         title = Gtk.Label(label="System Configuration")
@@ -36,19 +55,28 @@ class ExtrasPage(Gtk.Box):
         self.append(subtitle)
 
         # ─── Extras List ─────────────────────────────
-        extras_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        extras_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         extras_box.set_vexpand(True)
 
         for extra in self._extras:
+            wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             card = self._create_extra_card(extra)
-            extras_box.append(card)
+            wrapper.append(card)
+
+            # Add preview revealer for fish_config
+            if extra.key == "fish_config":
+                revealer = self._create_preview_revealer(FISH_CONFIG_PREVIEW)
+                self._preview_revealers[extra.key] = revealer
+                wrapper.append(revealer)
+
+            extras_box.append(wrapper)
 
         self.append(extras_box)
 
         # ─── Navigation ──────────────────────────────
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)
-        nav_box.set_margin_top(16)
+        nav_box.set_margin_top(12)
 
         back_btn = Gtk.Button(label="  ←  Back  ")
         back_btn.add_css_class("nav-button")
@@ -74,7 +102,7 @@ class ExtrasPage(Gtk.Box):
 
         # Icon
         icon = Gtk.Image.new_from_icon_name(extra.icon_name)
-        icon.set_pixel_size(36)
+        icon.set_pixel_size(32)
         icon.set_opacity(0.7)
         card.append(icon)
 
@@ -104,6 +132,40 @@ class ExtrasPage(Gtk.Box):
         self._switches[extra.key] = switch
         return card
 
+    def _create_preview_revealer(self, preview_text):
+        """Create a collapsible preview of config content."""
+        revealer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        revealer_box.set_margin_start(48)
+        revealer_box.set_margin_end(16)
+
+        revealer = Gtk.Revealer()
+        revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
+        revealer.set_transition_duration(300)
+        revealer.set_reveal_child(False)
+
+        preview_label = Gtk.Label(label="Preview — will be added to config.fish:")
+        preview_label.add_css_class("package-desc")
+        preview_label.set_halign(Gtk.Align.START)
+        preview_label.set_margin_bottom(4)
+        revealer.append(preview_label)
+
+        # Code block
+        code_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        code_box.add_css_class("log-scroll")
+
+        code_label = Gtk.Label(label=preview_text.strip())
+        code_label.add_css_class("log-text")
+        code_label.set_halign(Gtk.Align.START)
+        code_label.set_selectable(True)
+        code_box.append(code_label)
+
+        revealer.append(code_box)
+        revealer_box.append(revealer)
+
+        # Store revealer reference on the box for toggling
+        revealer_box._revealer = revealer
+        return revealer_box
+
     def _on_switch_toggled(self, switch, state, extra, card):
         """Handle extra toggle."""
         extra.selected = state
@@ -111,6 +173,11 @@ class ExtrasPage(Gtk.Box):
             card.add_css_class("selected")
         else:
             card.remove_css_class("selected")
+
+        # Toggle preview revealer if it exists
+        if extra.key in self._preview_revealers:
+            revealer_box = self._preview_revealers[extra.key]
+            revealer_box._revealer.set_reveal_child(state)
 
     def _on_apply_clicked(self, _btn):
         """Continue with selected extras."""

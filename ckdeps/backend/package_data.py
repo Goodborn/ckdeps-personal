@@ -91,6 +91,8 @@ ALL_PACKAGES = AUR_PACKAGES + PACMAN_PACKAGES + FLATPAK_PACKAGES
 EXTRAS = [
     ExtraConfig("aliases", "Custom Aliases", "Install ~/CustomScripts/aliases.fish with weather, ls, update, and remove functions",
                 "utilities-terminal"),
+    ExtraConfig("fish_config", "Fish Shell Config", "Configure config.fish with Starship, TheFuck, Atuin, Zoxide, aliases, and command duration timer",
+                "utilities-terminal"),
     ExtraConfig("disable_recent", "Disable Recent Files", "Turn off GNOME recent file tracking for privacy",
                 "preferences-system-privacy"),
     ExtraConfig("performance_mode", "Performance Mode", "Set power profiles to performance (ideal for desktops)",

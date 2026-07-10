@@ -273,6 +273,8 @@ class Installer:
 
                 if extra.key == "aliases":
                     result = self._setup_aliases()
+                elif extra.key == "fish_config":
+                    result = self._setup_fish_config()
                 elif extra.key == "disable_recent":
                     result = self._disable_recent_files()
                 elif extra.key == "performance_mode":
@@ -302,8 +304,7 @@ class Installer:
             return ("exists", "File already exists")
 
         alias_file.parent.mkdir(parents=True, exist_ok=True)
-        alias_file.write_text(
-            """# Weather function (defaults to Gjilan unless a location is provided)
+        alias_file.write_text(r"""# Weather function (defaults to Gjilan unless a location is provided)
 function weather
     set -l location Gjilan
 
@@ -394,9 +395,9 @@ function remove
 
                 set -l found 0
 
-                set -l dirs \\
-                    "$HOME/.config/$pkg" \\
-                    "$HOME/.cache/$pkg" \\
+                set -l dirs \
+                    "$HOME/.config/$pkg" \
+                    "$HOME/.cache/$pkg" \
                     "$HOME/.local/share/$pkg"
 
                 for dir in $dirs
@@ -442,10 +443,14 @@ end
 
 ######################################################
 
+# alias train='sl'
+# Run the train in terminal
+
+######################################################
+
 # Edit this file, reload it, and show aliases (if mylist exists)
 alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/aliases.fish; and functions -q mylist; and mylist'
-"""
-        )
+""")
 
         # Source in fish config
         fish_config = home / ".config" / "fish" / "config.fish"
@@ -460,6 +465,90 @@ alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/
                     )
 
         return ("success", "Fish aliases configured")
+
+    def _setup_fish_config(self) -> tuple[str, str]:
+        """Set up fish config.fish with Starship, TheFuck, Atuin, Zoxide, aliases, and command duration."""
+        home = Path.home()
+        fish_dir = home / ".config" / "fish"
+        fish_config = fish_dir / "config.fish"
+        fish_dir.mkdir(parents=True, exist_ok=True)
+
+        # Check if already configured
+        if fish_config.exists():
+            content = fish_config.read_text()
+            if "CKDEPS" in content:
+                return ("exists", "Fish config already configured")
+
+        config_content = r"""# ═══════════════════════════════════════════════════════
+# CKDEPS — Fish Shell Configuration
+# ═══════════════════════════════════════════════════════
+
+# overwrite greeting
+# potentially disabling fastfetch
+#function fish_greeting
+#    # smth smth
+#end
+
+# Starship
+starship init fish | source
+
+# The Fuck
+thefuck --alias fk | source
+
+# Atuin
+atuin init fish | source
+
+# Zoxide
+zoxide init fish | source
+
+# My custom aliases
+source ~/CustomScripts/aliases.fish
+
+# ───────── Command duration (right prompt) ─────────
+
+set -g __cmd_start 0
+set -g __cmd_duration ""
+
+function __cmd_timer_start --on-event fish_preexec
+    set -g __cmd_start (date +%s%N)
+end
+
+function __cmd_timer_end --on-event fish_postexec
+    set -l end (date +%s%N)
+    set -l elapsed_ms (math "($end - $__cmd_start) / 1000000")
+
+    if test $elapsed_ms -lt 500
+        set -g __cmd_duration ""
+        return
+    end
+
+    if test $elapsed_ms -ge 60000
+        set -l mins (math -s0 "$elapsed_ms / 60000")
+        set -l secs (math -s0 "($elapsed_ms % 60000) / 1000")
+        set -g __cmd_duration "󱎫 $mins m $secs s"
+    else
+        set -l secs (math -s2 "$elapsed_ms / 1000")
+        set -g __cmd_duration "󱎫 $secs s"
+    end
+end
+
+function fish_right_prompt
+    if test -n "$__cmd_duration"
+        set_color yellow
+        echo -n "$__cmd_duration"
+        set_color normal
+    end
+end
+"""
+
+        # Backup existing config
+        if fish_config.exists():
+            import shutil
+            backup = fish_config.with_suffix(".fish.bak")
+            shutil.copy2(fish_config, backup)
+
+        fish_config.write_text(config_content)
+        return ("success", "Fish config written (backup saved as config.fish.bak)")
 
     def _setup_solaar(self, installed: list[str]) -> tuple[str, str]:
         """Add Solaar to Hyprland startup."""

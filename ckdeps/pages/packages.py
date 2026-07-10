@@ -212,13 +212,16 @@ class PackagesPage(Gtk.Box):
         if not available:
             card.set_opacity(0.35)
             card.set_sensitive(False)
+        elif pkg.installed:
+            card.set_opacity(0.5)
+            card.set_sensitive(False)
 
         # Checkbox
         check = Gtk.CheckButton()
-        check.set_active(pkg.selected if available else False)
+        check.set_active(pkg.selected if (available and not pkg.installed) else False)
         check.set_valign(Gtk.Align.START)
         check.set_margin_top(4)
-        check.set_sensitive(available)
+        check.set_sensitive(available and not pkg.installed)
         check.connect("toggled", self._on_package_toggled, pkg, card)
         card.append(check)
 

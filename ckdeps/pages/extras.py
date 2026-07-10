@@ -25,9 +25,47 @@ source ~/CustomScripts/aliases.fish
 # Command duration in right prompt (shows >500ms commands)
 """
 
-# Extras that have a preview to show
+ALIASES_PREVIEW = """# Weather function (defaults to Gjilan)
+function weather
+    set -l location Gjilan
+    if test (count $argv) -gt 0
+        set location $argv[1]
+    end
+    curl "wttr.in/$location"
+end
+
+alias ls='eza --icons --group-directories-first --grid'
+
+function system_update
+    sudo pacman -Syu
+end
+
+function aur_update
+    yay -Syu
+end
+
+function remove
+    # Interactive package remover with cleanup options
+    # Usage: remove <package>
+end
+
+alias editalias='micro ~/CustomScripts/aliases.fish; ...'
+"""
+
+DISABLE_RECENT_PREVIEW = """# Disables GNOME recent file tracking
+gsettings set org.gnome.desktop.privacy \\
+    remember-recent-files false
+"""
+
+PERFORMANCE_PREVIEW = """# Sets power profile to performance mode
+powerprofilesctl set performance
+"""
+
 PREVIEW_EXTRAS = {
+    "aliases": ALIASES_PREVIEW,
     "fish_config": FISH_CONFIG_PREVIEW,
+    "disable_recent": DISABLE_RECENT_PREVIEW,
+    "performance_mode": PERFORMANCE_PREVIEW,
 }
 
 
@@ -71,7 +109,7 @@ class ExtrasPage(Gtk.Box):
 
             # Add preview revealer if this extra has one
             if extra.key in PREVIEW_EXTRAS:
-                revealer = self._create_preview_revealer(PREVIEW_EXTRAS[extra.key])
+                revealer = self._create_preview_revealer(PREVIEW_EXTRAS[extra.key], extra.key)
                 self._preview_revealers[extra.key] = revealer
                 wrapper.append(revealer)
 
@@ -149,7 +187,7 @@ class ExtrasPage(Gtk.Box):
         self._switches[extra.key] = switch
         return card
 
-    def _create_preview_revealer(self, preview_text):
+    def _create_preview_revealer(self, preview_text, extra_key=""):
         """Create a collapsible preview of config content."""
         revealer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         revealer_box.set_margin_start(48)
@@ -162,7 +200,14 @@ class ExtrasPage(Gtk.Box):
 
         inner_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
-        preview_label = Gtk.Label(label="Preview — will be added to config.fish:")
+        if extra_key == "fish_config":
+            label_text = "Preview — will be added to config.fish:"
+        elif extra_key == "aliases":
+            label_text = "Preview — will be written to ~/CustomScripts/aliases.fish:"
+        else:
+            label_text = "Preview — command that will run:"
+
+        preview_label = Gtk.Label(label=label_text)
         preview_label.add_css_class("package-desc")
         preview_label.set_halign(Gtk.Align.START)
         inner_box.append(preview_label)

@@ -91,7 +91,7 @@ class BootstrapPage(Gtk.Box):
         self._complete = False
 
         # ─── Header ──────────────────────────────────
-        title = Gtk.Label(label="System Bootstrap")
+        title = Gtk.Label(label="First Steps")
         title.add_css_class("page-title")
         title.set_halign(Gtk.Align.START)
         self.append(title)
@@ -136,7 +136,7 @@ class BootstrapPage(Gtk.Box):
         nav_box.set_halign(Gtk.Align.END)
         nav_box.set_margin_top(8)
 
-        self._start_btn = Gtk.Button(label="Start Bootstrap  →")
+        self._start_btn = Gtk.Button(label="Continue  →")
         self._start_btn.add_css_class("nav-button-primary")
         self._start_btn.connect("clicked", lambda _: self.start_bootstrap())
         nav_box.append(self._start_btn)
@@ -214,13 +214,14 @@ class BootstrapPage(Gtk.Box):
         return card
 
     def _auto_detect(self):
-        """Check what's already installed and auto-uncheck."""
+        """Check what's already installed and auto-uncheck + disable."""
         detected = _detect_installed()
 
         for row_data in self._step_rows:
             key = row_data["key"]
             if detected.get(key, False):
                 row_data["switch"].set_active(False)
+                row_data["switch"].set_sensitive(False)
                 row_data["detected_badge"].set_visible(True)
                 row_data["card"].set_opacity(0.6)
 

@@ -82,6 +82,8 @@ FLATPAK_PACKAGES = [
             flatpak_id="com.protonvpn.www"),
     Package("readest", "Readest", "Modern ebook reader", "com.bilingify.readest", "Productivity", "flatpak", domain=None,
             flatpak_id="com.bilingify.readest"),
+    Package("rufin", "Rufin", "Music client for Jellyfin, Subsonic, and Navidrome", "io.github.screwys.Rufin", "Media", "flatpak", domain="github.com",
+            flatpak_id="io.github.screwys.Rufin"),
     Package("upscayl", "Upscayl", "AI image upscaler", "org.upscayl.Upscayl", "Media", "flatpak", domain="upscayl.org",
             flatpak_id="org.upscayl.Upscayl"),
 ]

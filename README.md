@@ -42,7 +42,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 | gpu-screen-recorder | Fastest GPU-accelerated screen recorder |
 | openrgb | RGB lighting control |
 
-### Flatpak (12)
+### Flatpak (13)
 | Package | Description |
 |---------|-------------|
 | AnyDesk | Remote desktop |
@@ -56,6 +56,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 | Kdenlive | Professional video editor |
 | Proton VPN | Secure VPN application |
 | Readest | Modern ebook reader |
+| Rufin | Music client for Jellyfin, Subsonic, and Navidrome |
 | Upscayl | AI image upscaler |
 
 ---

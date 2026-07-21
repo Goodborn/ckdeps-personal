@@ -12,7 +12,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 ## 📋 Package List
 
-### AUR (7)
+### AUR (8)
 | Package | Description |
 |---------|-------------|
 | eden | Modern development tool |
@@ -20,6 +20,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 | namida-bin | Beautiful music and video player |
 | opencode-desktop-bin | AI-powered coding assistant |
 | popcorntime | Stream movies |
+| spotiflac-bin | Get Spotify tracks in true FLAC from Tidal, Qobuz & Amazon Music |
 | vm-curator-bin | VM management tool |
 | visual-studio-code-bin | Modern code editor |
 

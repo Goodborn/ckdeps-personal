@@ -39,6 +39,7 @@ AUR_PACKAGES = [
     Package("popcorntime", "Popcorn Time", "Stream movies", "video-display", "Media", "aur", domain="popcorntime.app"),
     Package("vm-curator-bin", "VM Curator", "VM management tool", "computer", "Development", "aur", domain="github.com"),
     Package("visual-studio-code-bin", "VS Code", "Modern code editor", "visual-studio-code", "Development", "aur", domain="code.visualstudio.com"),
+    Package("spotiflac-bin", "SpotiFLAC", "Get Spotify tracks in true FLAC from Tidal, Qobuz & Amazon Music", "audio-x-generic", "Media", "aur", domain="github.com"),
 ]
 
 # ---------- Pacman (Official) Packages ----------

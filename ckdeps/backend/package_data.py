@@ -57,6 +57,7 @@ PACMAN_PACKAGES = [
     Package("kolourpaint", "KolourPaint", "Easy-to-use paint program", "kolourpaint", "Media", "pacman", domain="kde.org"),
     Package("openrgb", "OpenRGB", "RGB lighting control", "colorimeter", "Hardware", "pacman", domain="openrgb.org"),
     Package("gpu-screen-recorder", "GPU Screen Recorder", "Fastest GPU-accelerated screen recorder", "video-display", "Media", "pacman", domain="git.dec05eba.com"),
+    Package("gnome-disk-utility", "GNOME Disks", "Disk management utility for automounting and configuring drives", "drive-harddisk", "System", "pacman", domain="gnome.org"),
 ]
 
 # ---------- Flatpak Packages ----------

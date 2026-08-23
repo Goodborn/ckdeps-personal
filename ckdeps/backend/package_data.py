@@ -58,6 +58,7 @@ PACMAN_PACKAGES = [
     Package("openrgb", "OpenRGB", "RGB lighting control", "colorimeter", "Hardware", "pacman", domain="openrgb.org"),
     Package("gpu-screen-recorder", "GPU Screen Recorder", "Fastest GPU-accelerated screen recorder", "video-display", "Media", "pacman", domain="git.dec05eba.com"),
     Package("gnome-disk-utility", "GNOME Disks", "Disk management utility for automounting and configuring drives", "drive-harddisk", "System", "pacman", domain="gnome.org"),
+    Package("zen-browser-bin", "Zen Browser", "Beautifully designed, privacy-focused browser", "web-browser", "Internet", "pacman", domain="zen-browser.app"),
 ]
 
 # ---------- Flatpak Packages ----------

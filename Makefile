@@ -14,7 +14,7 @@ deps:
 	# Install system dependencies if pacman is available (Arch/CachyOS)
 	@if command -v pacman > /dev/null; then \
 		echo "📦 Installing system dependencies..."; \
-		pacman -S --needed --noconfirm python-gobject gtk4 libadwaita flatpak librsvg; \
+		sudo pacman -S --needed --noconfirm python-gobject gtk4 libadwaita flatpak librsvg; \
 	fi
 
 install: deps

@@ -26,7 +26,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 > **Note:** `vm-curator-bin` also installs `qemu-full` and `sdl2` as dependencies.
 
-### Pacman (Official) (13)
+### Pacman (Official) (15)
 | Package | Description |
 |---------|-------------|
 | thefuck | Corrects console commands |
@@ -43,6 +43,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 | gpu-screen-recorder | Fastest GPU-accelerated screen recorder |
 | gnome-disk-utility | Disk management utility for automounting and configuring drives |
 | openrgb | RGB lighting control |
+| zen-browser-bin | Beautifully designed, privacy-focused browser |
 
 ### Flatpak (13)
 | Package | Description |
@@ -54,7 +55,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 | Cozy | Audiobook player |
 | Discord | Messaging and voice chat |
 | Foliate | Modern e-book reader |
-| Haruna | KDE media player |
+| Cine | Video player with a clean interface and MPV-based engine |
 | Kdenlive | Professional video editor |
 | Proton VPN | Secure VPN application |
 | Readest | Modern ebook reader |

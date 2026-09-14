@@ -18,7 +18,7 @@ def _gui_runtime_available() -> bool:
 
 
 def _ensure_gui_deps() -> None:
-    """Preflight: auto-install missing GTK4/libadwaita runtime (Arch/CachyOS)."""
+    """Preflight: auto-install missing GTK4/libadwaita runtime (Arch-based distros)."""
     if _gui_runtime_available():
         return
 

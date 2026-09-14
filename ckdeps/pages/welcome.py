@@ -30,7 +30,8 @@ class WelcomePage(Gtk.Box):
         title.set_opacity(0)
         self.append(title)
 
-        subtitle = Gtk.Label(label="CachyOS KDE Personal Stuff")
+        from ..backend.distro import friendly_name
+        subtitle = Gtk.Label(label=f"{friendly_name()} KDE Personal Stuff")
         subtitle.add_css_class("welcome-subtitle")
         subtitle.set_opacity(0)
         self.append(subtitle)
@@ -38,7 +39,7 @@ class WelcomePage(Gtk.Box):
         # ─── Description ─────────────────────────────
         desc = Gtk.Label(
             label="A personal initial (fresh install) app to my liking\n"
-                  "to get CachyOS KDE ready for my personal use."
+                  f"to get {friendly_name()} KDE ready for my personal use."
         )
         desc.add_css_class("welcome-description")
         desc.set_wrap(True)

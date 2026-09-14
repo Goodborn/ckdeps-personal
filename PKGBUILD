@@ -3,7 +3,7 @@
 pkgname=ckdeps
 pkgver=1.0.0
 pkgrel=1
-pkgdesc="Beautiful GTK4 system deployment wizard for CachyOS / Arch Linux"
+pkgdesc="Beautiful GTK4 system deployment wizard for Arch-based distros"
 arch=('any')
 url="https://github.com/goodborn/ckdeps-personal"
 license=('GPL-3.0-or-later')

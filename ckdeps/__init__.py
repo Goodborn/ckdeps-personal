@@ -1,4 +1,4 @@
-"""CKDEPS — A personal initial (fresh install) app to get CachyOS KDE ready."""
+"""CKDEPS — A personal initial (fresh install) app for Arch-based KDE systems."""
 
 __version__ = "1.0.0"
 __app_id__ = "com.goodborn.ckdeps"

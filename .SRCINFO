@@ -1,5 +1,5 @@
 pkgbase = ckdeps
-	pkgdesc = Beautiful GTK4 system deployment wizard for CachyOS / Arch Linux
+	pkgdesc = Beautiful GTK4 system deployment wizard for Arch-based distros
 	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/goodborn/ckdeps

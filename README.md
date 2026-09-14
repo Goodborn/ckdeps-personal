@@ -1,12 +1,12 @@
 # 🚀 CKDEPS
 
-**CKDEPS — A personal initial (fresh install) app to get CachyOS KDE ready.**
+**CKDEPS — A personal initial (fresh install) app for Arch-based KDE systems.**
 
-CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE ready for my personal use.
+CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based KDE ready for my personal use.
 
 ![CKDEPS](https://img.shields.io/badge/GTK4-Adwaita-a855f7?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge)
-![Arch](https://img.shields.io/badge/CachyOS-Arch_Linux-1793d1?style=for-the-badge)
+![Arch](https://img.shields.io/badge/Arch_Linux-1793d1?style=for-the-badge)
 
 ---
 
@@ -66,7 +66,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get CachyOS KDE
 
 ## 🔧 Installation
 
-### ⚡ One-Tap Run (Arch / CachyOS)
+### ⚡ One-Tap Run (Arch / CachyOS / Manjaro / EndeavourOS)
 Copy and paste this block to launch:
 ```bash
 git clone https://github.com/goodborn/ckdeps-personal.git && \

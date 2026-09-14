@@ -58,7 +58,7 @@ class CKDEPSApp(Adw.Application):
             license_type=Gtk.License.GPL_3_0,
             website="https://github.com/goodborn/ckdeps-personal",
             issue_url="https://github.com/goodborn/ckdeps-personal/issues",
-            comments="Beautiful CachyOS system deployment wizard.\n"
+            comments="Beautiful system deployment wizard for Arch-based distros.\n"
                      "Install packages, configure extras, and bootstrap your system.",
         )
         about.present()

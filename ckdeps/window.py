@@ -45,9 +45,10 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
         # Title widget
+        from .backend.distro import friendly_name
         title_widget = Adw.WindowTitle(
             title="CKDEPS",
-            subtitle="CachyOS KDE Personal Stuff"
+            subtitle=f"{friendly_name()} KDE Personal Stuff"
         )
         # ─── Custom Header (Undecorated Window) ───────
         handle = Gtk.WindowHandle()

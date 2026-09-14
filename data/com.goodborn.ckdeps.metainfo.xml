@@ -4,10 +4,10 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <name>CKDEPS</name>
-  <summary>Beautiful CachyOS system deployment wizard</summary>
+  <summary>Beautiful system deployment wizard for Arch-based distros</summary>
   <description>
     <p>
-      CKDEPS transforms your CachyOS fresh-install experience into a beautiful,
+      CKDEPS transforms your fresh-install experience into a beautiful,
       guided wizard. Select packages from AUR and Flatpak, configure system extras, and
       watch everything install with live progress tracking — all from a stunning GUI.
     </p>

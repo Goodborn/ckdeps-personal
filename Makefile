@@ -11,7 +11,7 @@ CSSDIR = $(DATADIR)/ckdeps
 .PHONY: install uninstall deps
 
 deps:
-	# Install system dependencies if pacman is available (Arch/CachyOS)
+	# Install system dependencies if pacman is available (Arch-based distros)
 	@if command -v pacman > /dev/null; then \
 		echo "📦 Installing system dependencies..."; \
 		sudo pacman -S --needed --noconfirm python-gobject gtk4 libadwaita flatpak librsvg; \
@@ -28,6 +28,7 @@ install: deps
 	install -Dm644 ckdeps/window.py "$(DESTDIR)$(LIBDIR)/ckdeps/window.py"
 	install -Dm644 ckdeps/backend/__init__.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/__init__.py"
 	install -Dm644 ckdeps/backend/installer.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/installer.py"
+	install -Dm644 ckdeps/backend/distro.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/distro.py"
 	install -Dm644 ckdeps/backend/package_data.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/package_data.py"
 	install -Dm644 ckdeps/backend/icon_loader.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/icon_loader.py"
 	install -Dm644 ckdeps/pages/__init__.py "$(DESTDIR)$(LIBDIR)/ckdeps/pages/__init__.py"

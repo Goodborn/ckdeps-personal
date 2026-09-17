@@ -53,18 +53,20 @@ class Installer:
         self._cancel = False
 
     # ─── Persistent Logging ──────────────────────────────────────
+    #
+    # A live log is written incrementally to a hidden XDG-state location
+    # while a run is in progress, so a crash mid-run is still diagnosable.
+    # Once a run finishes cleanly, finalize_log() copies it to a visible
+    # folder in the user's home directory for easy access.
+
+    FINAL_LOG_DIR = Path.home() / "ckdeps-logs"
 
     def _init_log_file(self) -> Optional[Path]:
-        """Create a per-run log file under ~/.local/state so failures are
-        diagnosable after the app closes, not just while it's on screen."""
+        """Create a per-run live log file under ~/.local/state."""
         try:
             log_dir = Path.home() / ".local" / "state" / "ckdeps" / "logs"
             log_dir.mkdir(parents=True, exist_ok=True)
-
-            # Keep only the most recent 10 logs.
-            existing = sorted(log_dir.glob("ckdeps-*.log"))
-            for old in existing[:-9]:
-                old.unlink(missing_ok=True)
+            self._prune_old_logs(log_dir)
 
             path = log_dir / f"ckdeps-{datetime.now():%Y%m%d-%H%M%S}.log"
             path.touch()
@@ -72,8 +74,18 @@ class Installer:
         except Exception:
             return None
 
+    @staticmethod
+    def _prune_old_logs(log_dir: Path, keep: int = 10):
+        """Keep only the most recent `keep` log files in a directory."""
+        try:
+            existing = sorted(log_dir.glob("ckdeps-*.log"))
+            for old in existing[:-(keep - 1)] if keep > 1 else existing:
+                old.unlink(missing_ok=True)
+        except Exception:
+            pass
+
     def _log(self, line: str):
-        """Best-effort append to the persistent log file."""
+        """Best-effort append to the live log file."""
         if not self.log_path:
             return
         try:
@@ -81,6 +93,21 @@ class Installer:
                 f.write(line + "\n")
         except Exception:
             pass
+
+    def finalize_log(self) -> Optional[Path]:
+        """Copy the live log to a visible folder in the user's home
+        directory (~/ckdeps-logs/) once a run completes. Returns the final
+        path, or the hidden live-log path if finalizing fails."""
+        if not self.log_path:
+            return None
+        try:
+            self.FINAL_LOG_DIR.mkdir(parents=True, exist_ok=True)
+            self._prune_old_logs(self.FINAL_LOG_DIR)
+            final_path = self.FINAL_LOG_DIR / self.log_path.name
+            shutil.copy2(self.log_path, final_path)
+            return final_path
+        except Exception:
+            return self.log_path
 
     # ─── Preflight Checks ─────────────────────────────────────────
 

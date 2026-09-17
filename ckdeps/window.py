@@ -275,9 +275,10 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         """Called when all extras are done, show summary."""
         duration = time.time() - self._start_time
         self._extras_results = results
+        final_log_path = self._installer.finalize_log()
         self._summary_page.populate(
             self._package_results, self._extras_results, duration,
-            self._terminal_log, self._installer.log_path,
+            self._terminal_log, final_log_path,
         )
         self._stack.set_visible_child_name("summary")
 

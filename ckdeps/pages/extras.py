@@ -108,7 +108,6 @@ class ExtrasPage(Gtk.Box):
 
         # ─── Extras List ─────────────────────────────
         extras_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        extras_box.set_vexpand(True)
 
         for extra in self._extras:
             wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -123,7 +122,13 @@ class ExtrasPage(Gtk.Box):
 
             extras_box.append(wrapper)
 
-        self.append(extras_box)
+        # The window has a fixed size — expanding a preview must scroll the
+        # list, not grow past the visible page (which just clipped before).
+        extras_scroll = Gtk.ScrolledWindow()
+        extras_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        extras_scroll.set_vexpand(True)
+        extras_scroll.set_child(extras_box)
+        self.append(extras_scroll)
 
         # ─── Navigation ──────────────────────────────
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)

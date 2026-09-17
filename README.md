@@ -12,10 +12,11 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 
 ## 📋 Package List
 
-### AUR (8)
+### AUR (9)
 | Package | Description |
 |---------|-------------|
 | eden | Modern development tool |
+| localsend | Cross-platform local file sharing (AirDrop alternative) |
 | millennium | Steam skin manager |
 | namida-bin | Beautiful music and video player |
 | opencode-desktop-bin | AI-powered coding assistant |

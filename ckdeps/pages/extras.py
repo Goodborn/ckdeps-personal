@@ -61,11 +61,19 @@ PERFORMANCE_PREVIEW = """# Sets power profile to performance mode
 powerprofilesctl set performance
 """
 
+LOCALSEND_UFW_PREVIEW = """# Allow LocalSend (port 53317) through UFW on your local network
+# Subnet is auto-detected from your default route (e.g. 192.168.1.0/24)
+
+sudo ufw allow from <local-subnet>/24 to any port 53317 proto tcp
+sudo ufw allow from <local-subnet>/24 to any port 53317 proto udp
+"""
+
 PREVIEW_EXTRAS = {
     "aliases": ALIASES_PREVIEW,
     "fish_config": FISH_CONFIG_PREVIEW,
     "disable_recent": DISABLE_RECENT_PREVIEW,
     "performance_mode": PERFORMANCE_PREVIEW,
+    "localsend_ufw": LOCALSEND_UFW_PREVIEW,
 }
 
 

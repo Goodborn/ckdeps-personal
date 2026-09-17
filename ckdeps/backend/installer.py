@@ -298,6 +298,8 @@ class Installer:
                     result = self._disable_recent_files()
                 elif extra.key == "performance_mode":
                     result = self._set_performance_mode()
+                elif extra.key == "localsend_ufw":
+                    result = self._setup_localsend_ufw()
                 else:
                     result = ("skipped", "Unknown extra")
 
@@ -614,6 +616,54 @@ end
         if success:
             return ("success", "Performance mode enabled")
         return ("failed", "Failed to set performance mode")
+
+    def _setup_localsend_ufw(self) -> tuple[str, str]:
+        """Allow LocalSend (port 53317) through UFW on the local network."""
+        if not shutil.which("ufw"):
+            return ("skipped", "ufw not installed, not needed")
+
+        subnet = self._detect_lan_subnet()
+        if not subnet:
+            return ("failed", "Could not detect local network subnet")
+
+        status, _ = self._run_command(
+            ["sudo", "ufw", "status", "verbose"]
+        )
+
+        existing_ok = True
+        added = 0
+        for proto in ("tcp", "udp"):
+            if f"53317/{proto}" in status:
+                continue
+            success, _ = self._run_command(
+                ["sudo", "ufw", "allow", "from", subnet,
+                 "to", "any", "port", "53317", "proto", proto]
+            )
+            if success:
+                added += 1
+            else:
+                existing_ok = False
+
+        if added == 0 and existing_ok:
+            return ("exists", "UFW rules already allow LocalSend")
+        if existing_ok:
+            return ("success", f"UFW allows LocalSend from {subnet}")
+        return ("failed", "Failed to add all UFW rules")
+
+    def _detect_lan_subnet(self) -> Optional[str]:
+        """Detect the local /24 subnet from the default route."""
+        try:
+            result = subprocess.run(
+                ["ip", "route", "show", "default"],
+                capture_output=True, text=True, timeout=5
+            )
+            parts = result.stdout.split()
+            if "via" in parts:
+                gateway = parts[parts.index("via") + 1]
+                return ".".join(gateway.split(".")[:3]) + ".0/24"
+        except Exception:
+            pass
+        return None
 
     def _install_java(self) -> tuple[str, str]:
         """Install JRE for Bolt Launcher."""

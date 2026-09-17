@@ -33,6 +33,7 @@ class ExtraConfig:
 # ---------- AUR Packages ----------
 AUR_PACKAGES = [
     Package("eden", "Eden", "Modern development tool", "applications-development", "Development", "aur", domain="github.com"),
+    Package("localsend", "LocalSend", "Cross-platform local file sharing (AirDrop alternative)", "network-transmit-receive", "Networking", "aur", domain="localsend.org"),
     Package("millennium", "Millennium", "Steam skin manager", "steam", "Gaming", "aur", domain="github.com"),
     Package("namida-bin", "Namida", "Beautiful music and video player", "multimedia-audio-player", "Media", "aur", domain="github.com"),
     Package("opencode-desktop-bin", "OpenCode Desktop", "AI-powered coding assistant", "code", "Development", "aur", domain="github.com"),
@@ -103,6 +104,8 @@ EXTRAS = [
                 "preferences-system-privacy"),
     ExtraConfig("performance_mode", "Performance Mode", "Set power profiles to performance (ideal for desktops)",
                 "power-profile-performance-symbolic"),
+    ExtraConfig("localsend_ufw", "LocalSend UFW Fix", "Allow LocalSend through UFW firewall (port 53317) on your local network",
+                "network-transmit-receive"),
 ]
 
 # ---------- Category Colors (for UI) ----------

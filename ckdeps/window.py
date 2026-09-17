@@ -68,8 +68,12 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         quit_btn.set_icon_name("window-close-symbolic")
         quit_btn.add_css_class("header-quit-button")
         quit_btn.set_tooltip_text("Quit Application")
-        quit_btn.connect("clicked", lambda _: self._on_finish())
+        quit_btn.connect("clicked", lambda _: self._request_close())
         header.append(quit_btn)
+
+        # Guard every close path (this button, Ctrl+Q, the WM) so an
+        # installation in progress can't be silently interrupted.
+        self.connect("close-request", self._on_close_request)
 
         handle.set_child(header)
         main_box.append(handle)
@@ -84,7 +88,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._splash_page = SplashPage()
         self._stack.add_named(self._splash_page, "splash")
 
-        self._welcome_page = WelcomePage(on_begin=self._go_to_bootstrap)
+        self._welcome_page = WelcomePage(installer=self._installer, on_begin=self._go_to_bootstrap)
         self._stack.add_named(self._welcome_page, "welcome")
 
         self._bootstrap_page = BootstrapPage(
@@ -224,6 +228,12 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         """Navigate to summary page after packages are done."""
         self._package_results = package_results
 
+        if self._installer.was_cancelled:
+            # Don't chain into extras — the user asked us to stop.
+            self._installer.reset_cancel()
+            self._on_all_extras_done([])
+            return
+
         # Now run extras
         installed_names = [
             p.name for p, s in package_results if s in ("installed", "skipped")
@@ -265,8 +275,56 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         """Called when all extras are done, show summary."""
         duration = time.time() - self._start_time
         self._extras_results = results
-        self._summary_page.populate(self._package_results, self._extras_results, duration, self._terminal_log)
+        self._summary_page.populate(
+            self._package_results, self._extras_results, duration,
+            self._terminal_log, self._installer.log_path,
+        )
         self._stack.set_visible_child_name("summary")
+
+    def _request_close(self):
+        """Ask the window to close through the normal close-request path,
+        so the quit button and Ctrl+Q share the same in-progress guard as
+        the window manager's own close signal."""
+        self.close()
+
+    def _on_close_request(self, *_args) -> bool:
+        """Intercept every close path. If nothing is running, quit normally;
+        otherwise warn before allowing pacman/yay to be interrupted."""
+        if self._installer.busy:
+            self._confirm_quit_during_install()
+            return True  # stop the default handler; we decide when to close
+
+        self._on_finish()
+        return True
+
+    def _confirm_quit_during_install(self):
+        dialog = Adw.MessageDialog(
+            transient_for=self,
+            heading="Installation in progress",
+            body=(
+                "CKDEPS is still installing packages or applying changes. "
+                "Quitting now can leave pacman locked or your system "
+                "half-configured.\n\n"
+                "You can stop the current operation safely and keep the "
+                "app open, or force quit anyway."
+            ),
+        )
+        dialog.add_response("stay", "Keep Installing")
+        dialog.add_response("stop", "Stop, Stay Open")
+        dialog.add_response("force-quit", "Force Quit")
+        dialog.set_response_appearance("stop", Adw.ResponseAppearance.SUGGESTED)
+        dialog.set_response_appearance("force-quit", Adw.ResponseAppearance.DESTRUCTIVE)
+        dialog.set_default_response("stay")
+        dialog.set_close_response("stay")
+        dialog.connect("response", self._on_quit_confirm_response)
+        dialog.present()
+
+    def _on_quit_confirm_response(self, _dialog, response):
+        if response == "stop":
+            self._installer.cancel()
+        elif response == "force-quit":
+            self._installer.cancel()
+            self._on_finish()
 
     def _on_finish(self):
         """Close the application."""

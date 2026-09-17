@@ -18,6 +18,7 @@ class SummaryPage(Gtk.Box):
         self._extras_results = []
         self._duration = 0
         self._log = ""
+        self._log_path = None
 
         # ─── Hero Section ────────────────────────────
         hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
@@ -106,12 +107,13 @@ class SummaryPage(Gtk.Box):
             self._results_title, self._scroll, self._close_btn, signature
         ]
 
-    def populate(self, package_results, extras_results, duration=0, log=""):
+    def populate(self, package_results, extras_results, duration=0, log="", log_path=None):
         """Fill in the summary data and animate."""
         self._package_results = package_results
         self._extras_results = extras_results
         self._duration = duration
         self._log = log
+        self._log_path = log_path
         self._build_report()
 
     def _build_report(self):
@@ -255,6 +257,16 @@ class SummaryPage(Gtk.Box):
             
             log_expander.set_child(log_scroll)
             self._results_box.append(log_expander)
+
+        if self._log_path:
+            log_path_label = Gtk.Label(
+                label=f"Full log saved to: {self._log_path}"
+            )
+            log_path_label.add_css_class("summary-log-path")
+            log_path_label.set_halign(Gtk.Align.START)
+            log_path_label.set_selectable(True)
+            log_path_label.set_margin_top(6)
+            self._results_box.append(log_path_label)
 
         # ─── Animate In ──────────────────────────────
         for i, w in enumerate(self._anim_widgets):

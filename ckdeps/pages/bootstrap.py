@@ -136,6 +136,12 @@ class BootstrapPage(Gtk.Box):
         nav_box.set_halign(Gtk.Align.END)
         nav_box.set_margin_top(8)
 
+        self._cancel_btn = Gtk.Button(label="Cancel")
+        self._cancel_btn.add_css_class("nav-button-skip")
+        self._cancel_btn.connect("clicked", self._on_cancel_clicked)
+        self._cancel_btn.set_visible(False)
+        nav_box.append(self._cancel_btn)
+
         self._start_btn = Gtk.Button(label="Continue  →")
         self._start_btn.add_css_class("nav-button-primary")
         self._start_btn.connect("clicked", lambda _: self.start_bootstrap())
@@ -252,6 +258,8 @@ class BootstrapPage(Gtk.Box):
         for sw in self._switches.values():
             sw.set_sensitive(False)
         self._start_btn.set_visible(False)
+        self._cancel_btn.set_visible(True)
+        self._cancel_btn.set_sensitive(True)
         self._spinner.set_spinning(True)
         self._spinner.set_visible(True)
         self._status_label.set_text("Starting bootstrap...")
@@ -292,10 +300,18 @@ class BootstrapPage(Gtk.Box):
         if hasattr(window, "append_log"):
             window.append_log(line)
 
+    def _on_cancel_clicked(self, _btn):
+        """Stop bootstrap after the current step finishes."""
+        self._cancel_btn.set_sensitive(False)
+        self._cancel_btn.set_label("Cancelling...")
+        self._status_label.set_text("Stopping after the current step...")
+        self.installer.cancel()
+
     def _on_all_complete(self, results):
         """Called when all bootstrap steps are done."""
         self._spinner.set_spinning(False)
         self._spinner.set_visible(False)
+        self._cancel_btn.set_visible(False)
 
         # Mark any active step as done
         for row_data in self._step_rows:

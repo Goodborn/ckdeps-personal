@@ -1,9 +1,11 @@
 """Backend installer — runs all shell commands in background threads."""
 
+import socket
 import subprocess
 import shutil
 import os
 import threading
+from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -12,6 +14,7 @@ gi.require_version("GLib", "2.0")
 from gi.repository import GLib
 
 from .package_data import Package, ExtraConfig
+from .distro import is_arch_based, distro_name
 
 # Dependencies that need to be installed alongside certain packages
 PACKAGE_DEPENDENCIES = {
@@ -25,10 +28,148 @@ class Installer:
     def __init__(self):
         self._cancel = False
         self.sudo_password = None
+        # True while a bootstrap/install/extras run is active — used to
+        # guard against quitting mid-operation and leaving the system
+        # (e.g. pacman's db lock) in an inconsistent state.
+        self.busy = False
+        self.log_path = self._init_log_file()
+        self._log(f"CKDEPS run started — distro: {distro_name() or 'unknown'}, "
+                   f"arch_based: {is_arch_based()}")
 
     def cancel(self):
         """Request cancellation of current operations."""
         self._cancel = True
+
+    @property
+    def was_cancelled(self) -> bool:
+        """Whether the most recent run was stopped via cancel(). Callers that
+        chain stages (packages -> extras) should check this before starting
+        the next stage, since bootstrap/install/run_extras each reset the
+        flag for themselves at the start of their own run."""
+        return self._cancel
+
+    def reset_cancel(self):
+        """Clear a pending cancellation so the next stage can run normally."""
+        self._cancel = False
+
+    # ─── Persistent Logging ──────────────────────────────────────
+
+    def _init_log_file(self) -> Optional[Path]:
+        """Create a per-run log file under ~/.local/state so failures are
+        diagnosable after the app closes, not just while it's on screen."""
+        try:
+            log_dir = Path.home() / ".local" / "state" / "ckdeps" / "logs"
+            log_dir.mkdir(parents=True, exist_ok=True)
+
+            # Keep only the most recent 10 logs.
+            existing = sorted(log_dir.glob("ckdeps-*.log"))
+            for old in existing[:-9]:
+                old.unlink(missing_ok=True)
+
+            path = log_dir / f"ckdeps-{datetime.now():%Y%m%d-%H%M%S}.log"
+            path.touch()
+            return path
+        except Exception:
+            return None
+
+    def _log(self, line: str):
+        """Best-effort append to the persistent log file."""
+        if not self.log_path:
+            return
+        try:
+            with open(self.log_path, "a") as f:
+                f.write(line + "\n")
+        except Exception:
+            pass
+
+    # ─── Preflight Checks ─────────────────────────────────────────
+
+    def verify_sudo_password(self, password: str, on_result: Callable):
+        """Validate a sudo password without running any privileged command.
+        Prevents silently blasting through every install step with a wrong
+        password and only finding out from a wall of failures."""
+        def _work():
+            try:
+                proc = subprocess.Popen(
+                    ["sudo", "-S", "-k", "-v"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+                try:
+                    proc.communicate(password + "\n", timeout=15)
+                    ok = proc.returncode == 0
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.communicate()
+                    ok = False
+            except Exception:
+                ok = False
+            GLib.idle_add(on_result, ok)
+
+        self._run_in_thread(_work)
+
+    def check_environment(self, on_result: Callable):
+        """Run best-effort environment sanity checks in the background and
+        report back a list of (level, message) issues, where level is
+        'error' or 'warning'. Nothing here is fatal by itself — the caller
+        decides whether to block or let the user proceed."""
+        def _work():
+            issues = []
+
+            if not is_arch_based():
+                issues.append((
+                    "error",
+                    f"This doesn't look like an Arch-based system (detected: "
+                    f"{distro_name() or 'unknown'}). CKDEPS drives pacman/yay "
+                    f"directly and may fail or misbehave here."
+                ))
+
+            if not self._has_network():
+                issues.append((
+                    "warning",
+                    "No internet connection detected — package installs will "
+                    "likely fail."
+                ))
+
+            free_gb = self._free_disk_gb("/")
+            if free_gb is not None and free_gb < 2:
+                issues.append((
+                    "warning",
+                    f"Low disk space: only {free_gb:.1f} GB free on /."
+                ))
+
+            if Path("/var/lib/pacman/db.lck").exists():
+                issues.append((
+                    "warning",
+                    "A pacman lock file exists (/var/lib/pacman/db.lck) — "
+                    "another package manager may be running, or a previous "
+                    "run crashed without cleaning up."
+                ))
+
+            for level, msg in issues:
+                self._log(f"[preflight:{level}] {msg}")
+
+            GLib.idle_add(on_result, issues)
+
+        self._run_in_thread(_work)
+
+    def _has_network(self, timeout: float = 3.0) -> bool:
+        for host, port in (("archlinux.org", 443), ("1.1.1.1", 443)):
+            try:
+                socket.create_connection((host, port), timeout=timeout).close()
+                return True
+            except OSError:
+                continue
+        return False
+
+    def _free_disk_gb(self, path: str) -> Optional[float]:
+        try:
+            usage = shutil.disk_usage(path)
+            return usage.free / (1024 ** 3)
+        except Exception:
+            return None
 
     # ─── Status Checks ───────────────────────────────────────────
 
@@ -110,23 +251,32 @@ class Installer:
 
             output_lines = []
             for line in iter(process.stdout.readline, ""):
+                text = line.rstrip()
+                output_lines.append(text)
+                self._log(text)
+                if on_output:
+                    GLib.idle_add(on_output, text)
                 if self._cancel:
                     process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait()
                     return False, "Cancelled"
-                output_lines.append(line.rstrip())
-                if on_output:
-                    GLib.idle_add(on_output, line.rstrip())
 
             process.wait()
             return process.returncode == 0, "\n".join(output_lines)
 
         except FileNotFoundError:
             msg = f"Command not found: {cmd[0]}"
+            self._log(msg)
             if on_output:
                 GLib.idle_add(on_output, msg)
             return False, msg
         except Exception as e:
             msg = f"Error: {str(e)}"
+            self._log(msg)
             if on_output:
                 GLib.idle_add(on_output, msg)
             return False, msg
@@ -136,6 +286,9 @@ class Installer:
     def bootstrap_system(self, selected_steps: list[str], on_step: Callable,
                          on_output: Callable, on_complete: Callable):
         """Run selected bootstrap steps in background."""
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
             step_map = {
@@ -186,6 +339,7 @@ class Installer:
                     success, _ = self._run_command(cmd, on_output)
                     results.append((name, success))
 
+            self.busy = False
             GLib.idle_add(on_complete, results)
 
         self._run_in_thread(_work)
@@ -227,6 +381,9 @@ class Installer:
                                     on_package_complete: Callable,
                                     on_all_complete: Callable):
         """Install multiple packages sequentially in background."""
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
             for i, pkg in enumerate(packages):
@@ -271,6 +428,7 @@ class Installer:
                         if not dep_success:
                             GLib.idle_add(on_output, f"Warning: failed to install dependency {dep}")
 
+            self.busy = False
             GLib.idle_add(on_all_complete, results)
 
         self._run_in_thread(_work)
@@ -283,6 +441,9 @@ class Installer:
         """Run selected configuration extras in background."""
         if newly_installed is None:
             newly_installed = []
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
 

@@ -11,8 +11,9 @@ import os
 class WelcomePage(Gtk.Box):
     """First page of the wizard with animated branding."""
 
-    def __init__(self, on_begin: callable):
+    def __init__(self, installer, on_begin: callable):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
+        self._installer = installer
         self._on_begin = on_begin
         self.set_valign(Gtk.Align.CENTER)
         self.set_halign(Gtk.Align.CENTER)
@@ -117,19 +118,34 @@ class WelcomePage(Gtk.Box):
         self.pass_entry.set_size_request(300, -1)
         self.pass_entry.connect("activate", lambda _: self._on_begin_clicked())
         pass_box.append(self.pass_entry)
-        
+
+        self._pass_error = Gtk.Label(label="")
+        self._pass_error.add_css_class("welcome-password-error")
+        self._pass_error.set_halign(Gtk.Align.CENTER)
+        self._pass_error.set_visible(False)
+        pass_box.append(self._pass_error)
+
         self.append(pass_box)
 
         # ─── Begin Button ────────────────────────────
+        begin_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        begin_box.set_halign(Gtk.Align.CENTER)
+        begin_box.set_opacity(0)
+        self._begin_box = begin_box
+
+        self._begin_spinner = Gtk.Spinner()
+        self._begin_spinner.set_visible(False)
+        begin_box.append(self._begin_spinner)
+
         self.begin_btn = Gtk.Button(label="Begin Setup  →")
         self.begin_btn.add_css_class("begin-button")
-        self.begin_btn.set_halign(Gtk.Align.CENTER)
-        self.begin_btn.set_opacity(0)
         self.begin_btn.connect("clicked", lambda _: self._on_begin_clicked())
-        self.append(self.begin_btn)
+        begin_box.append(self.begin_btn)
+
+        self.append(begin_box)
 
         # ─── Stagger fade-in animation ───────────────
-        widgets = [logo, title, subtitle, desc, features_box, sysinfo, pass_box, self.begin_btn]
+        widgets = [logo, title, subtitle, desc, features_box, sysinfo, pass_box, begin_box]
         for i, w in enumerate(widgets):
             GLib.timeout_add(200 + i * 120, self._fade_in, w)
 
@@ -147,5 +163,84 @@ class WelcomePage(Gtk.Box):
         password = self.pass_entry.get_text()
         if not password:
             self.pass_entry.add_css_class("error")
+            self._show_error("Enter your password to continue.")
             return
-        self._on_begin(password)
+
+        self._set_busy(True, "Verifying password...")
+        self._installer.verify_sudo_password(password, self._on_password_verified)
+
+    def _on_password_verified(self, ok: bool):
+        password = self.pass_entry.get_text()
+        if not ok:
+            self._set_busy(False)
+            self.pass_entry.add_css_class("error")
+            self._show_error("Incorrect password. Please try again.")
+            self.pass_entry.grab_focus()
+            return
+
+        self.pass_entry.remove_css_class("error")
+        self._hide_error()
+        self._set_busy(True, "Checking system...")
+        self._installer.check_environment(
+            lambda issues: self._on_environment_checked(issues, password)
+        )
+
+    def _on_environment_checked(self, issues, password):
+        self._set_busy(False)
+
+        if not issues:
+            self._on_begin(password)
+            return
+
+        self._show_preflight_dialog(issues, password)
+
+    def _show_preflight_dialog(self, issues, password):
+        """Warn about anything the environment check found before letting
+        pacman/yay loose on the system. Errors (e.g. not Arch-based) get a
+        strong warning but the user can still override on their own system."""
+        has_error = any(level == "error" for level, _ in issues)
+        lines = "\n\n".join(f"• {msg}" for _level, msg in issues)
+
+        dialog = Adw.MessageDialog(
+            transient_for=self.get_root(),
+            heading="Before we continue" if not has_error else "This may not be safe",
+            body=lines,
+        )
+        dialog.add_response("cancel", "Cancel")
+        dialog.add_response("continue", "Continue Anyway")
+        dialog.set_response_appearance(
+            "continue",
+            Adw.ResponseAppearance.DESTRUCTIVE if has_error else Adw.ResponseAppearance.SUGGESTED,
+        )
+        dialog.set_default_response("cancel")
+        dialog.set_close_response("cancel")
+        dialog.connect("response", lambda d, r: self._on_preflight_response(r, password))
+        dialog.present()
+
+    def _on_preflight_response(self, response, password):
+        if response == "continue":
+            self._on_begin(password)
+
+    def _set_busy(self, busy: bool, status: str = ""):
+        self.begin_btn.set_sensitive(not busy)
+        self.pass_entry.set_sensitive(not busy)
+        self._begin_spinner.set_visible(busy)
+        if busy:
+            self._begin_spinner.start()
+        else:
+            self._begin_spinner.stop()
+        if status:
+            self._show_error(status, is_error=False)
+        elif not busy:
+            self._hide_error()
+
+    def _show_error(self, text: str, is_error: bool = True):
+        self._pass_error.set_text(text)
+        self._pass_error.set_visible(True)
+        if is_error:
+            self._pass_error.add_css_class("is-error")
+        else:
+            self._pass_error.remove_css_class("is-error")
+
+    def _hide_error(self):
+        self._pass_error.set_visible(False)

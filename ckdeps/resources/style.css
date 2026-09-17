@@ -175,6 +175,17 @@ headerbar.ckdeps-header title {
     color: alpha(white, 0.5);
 }
 
+.welcome-password-error {
+    font-size: 11px;
+    font-weight: 600;
+    color: alpha(#c4b5fd, 0.7);
+    margin-top: 2px;
+}
+
+.welcome-password-error.is-error {
+    color: #f87171;
+}
+
 /* ─── Begin Button ─────────────────────────────────── */
 .begin-button {
     background: linear-gradient(135deg, #a855f7, #6366f1);
@@ -579,6 +590,12 @@ headerbar.ckdeps-header title {
     color: #fbbf24;
     font-size: 10px;
     font-weight: 700;
+}
+
+.summary-log-path {
+    font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
+    font-size: 10px;
+    color: alpha(white, 0.35);
 }
 
 /* ─── Stats Row ────────────────────────────────────── */

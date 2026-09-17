@@ -63,6 +63,15 @@ class ProgressPage(Gtk.Box):
         self._status_label.set_halign(Gtk.Align.CENTER)
         self.append(self._status_label)
 
+        # ─── Cancel Button ────────────────────────────
+        self._cancel_btn = Gtk.Button(label="Cancel Installation")
+        self._cancel_btn.add_css_class("nav-button-skip")
+        self._cancel_btn.set_halign(Gtk.Align.CENTER)
+        self._cancel_btn.set_margin_top(8)
+        self._cancel_btn.connect("clicked", self._on_cancel_clicked)
+        self._cancel_btn.set_visible(False)
+        self.append(self._cancel_btn)
+
         # ─── Log Area (Optional, for visual feedback) ──────
         self._log_scroll = Gtk.ScrolledWindow()
         self._log_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -94,6 +103,8 @@ class ProgressPage(Gtk.Box):
 
         self._total = len(packages)
         self._counter_label.set_text(f"0 / {self._total}")
+        self._cancel_btn.set_visible(True)
+        self._cancel_btn.set_sensitive(True)
 
         self.installer.install_packages_sequential(
             packages=packages,
@@ -214,12 +225,20 @@ class ProgressPage(Gtk.Box):
         fraction = (index + 1) / total
         self._progress_bar.set_fraction(fraction)
 
+    def _on_cancel_clicked(self, _btn):
+        """Stop installation after the current package finishes."""
+        self._cancel_btn.set_sensitive(False)
+        self._cancel_btn.set_label("Cancelling...")
+        self._status_label.set_text("Stopping after the current package...")
+        self.installer.cancel()
+
     def _on_all_complete(self, results):
         """Called when all packages are done."""
         self._results = results
+        self._cancel_btn.set_visible(False)
         self._progress_bar.set_fraction(1.0)
         self._current_pkg_label.set_text("Complete!")
         self._status_label.set_text("✨ Transitioning to Summary...")
-        
+
         # Immediate transition to Summary
         GLib.timeout_add(800, lambda: self.on_complete(self._results))

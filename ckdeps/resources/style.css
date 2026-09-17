@@ -969,53 +969,40 @@ switch:checked {
 }
 
 /* ─── Ambient Background ───────────────────────────────
-   Soft, slowly-drifting glow blobs behind the whole app —
-   degrades gracefully to plain flat circles if `filter: blur()`
-   isn't supported by the running GTK, since the radial gradient
-   already fades to transparent on its own. ─── */
+   Soft glow blobs behind the whole app. Deliberately STATIC — no
+   transform/opacity animation. Animating `transform` on a blurred
+   element forces the compositor to redo the blur every frame,
+   forever, which made every page/window transition stutter since
+   it was competing for frame budget the whole time the app was
+   open. A static blurred texture is cheap (painted once); degrades
+   gracefully to plain flat circles if `filter: blur()` isn't
+   supported, since the radial gradient already fades to
+   transparent on its own. ─── */
 .ambient-orb {
     border-radius: 9999px;
-    filter: blur(80px);
-    opacity: 0.35;
+    filter: blur(50px);
+    opacity: 0.28;
 }
 
 .ambient-orb-1 {
     background: radial-gradient(circle, alpha(@ck-purple, 0.9) 0%, transparent 70%);
-    min-width: 460px;
-    min-height: 460px;
-    margin: -200px 0 0 -200px;
-    animation: orb-drift-1 20s ease-in-out infinite alternate;
+    min-width: 420px;
+    min-height: 420px;
+    margin: -180px 0 0 -180px;
 }
 
 .ambient-orb-2 {
     background: radial-gradient(circle, alpha(@ck-blue, 0.85) 0%, transparent 70%);
-    min-width: 420px;
-    min-height: 420px;
-    margin: 0 -180px -180px 0;
-    animation: orb-drift-2 24s ease-in-out infinite alternate;
+    min-width: 380px;
+    min-height: 380px;
+    margin: 0 -160px -160px 0;
 }
 
 .ambient-orb-3 {
     background: radial-gradient(circle, alpha(@ck-indigo, 0.8) 0%, transparent 70%);
-    min-width: 320px;
-    min-height: 320px;
-    margin: -140px -140px 0 0;
-    animation: orb-drift-3 17s ease-in-out infinite alternate;
-}
-
-@keyframes orb-drift-1 {
-    0%   { transform: translate(0, 0) scale(1); opacity: 0.28; }
-    100% { transform: translate(50px, 40px) scale(1.15); opacity: 0.42; }
-}
-
-@keyframes orb-drift-2 {
-    0%   { transform: translate(0, 0) scale(1); opacity: 0.22; }
-    100% { transform: translate(-40px, -50px) scale(1.1); opacity: 0.38; }
-}
-
-@keyframes orb-drift-3 {
-    0%   { transform: translate(0, 0) scale(1); opacity: 0.18; }
-    100% { transform: translate(-30px, 35px) scale(1.12); opacity: 0.3; }
+    min-width: 300px;
+    min-height: 300px;
+    margin: -120px -120px 0 0;
 }
 
 /* ─── Step Indicator ────────────────────────────────── */

@@ -5,6 +5,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib
 
+from ..backend.paths import app_icon_path
+
 
 class SplashPage(Gtk.Box):
     """Initial splash screen with animation."""
@@ -16,7 +18,13 @@ class SplashPage(Gtk.Box):
         self.add_css_class("splash-container")
 
         # ─── Logo / Icon ──────────────────────────────
-        self._logo = Gtk.Label(label="💎")
+        icon_path = app_icon_path()
+        if icon_path:
+            self._logo = Gtk.Image.new_from_file(str(icon_path))
+            self._logo.set_pixel_size(96)
+        else:
+            self._logo = Gtk.Image.new_from_icon_name("application-x-executable-symbolic")
+            self._logo.set_pixel_size(72)
         self._logo.add_css_class("splash-logo")
         self._logo.set_opacity(0)
         self.append(self._logo)

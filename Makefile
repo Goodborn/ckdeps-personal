@@ -31,6 +31,7 @@ install: deps
 	install -Dm644 ckdeps/backend/distro.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/distro.py"
 	install -Dm644 ckdeps/backend/package_data.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/package_data.py"
 	install -Dm644 ckdeps/backend/icon_loader.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/icon_loader.py"
+	install -Dm644 ckdeps/backend/paths.py "$(DESTDIR)$(LIBDIR)/ckdeps/backend/paths.py"
 	install -Dm644 ckdeps/pages/__init__.py "$(DESTDIR)$(LIBDIR)/ckdeps/pages/__init__.py"
 	install -Dm644 ckdeps/pages/splash.py "$(DESTDIR)$(LIBDIR)/ckdeps/pages/splash.py"
 	install -Dm644 ckdeps/pages/welcome.py "$(DESTDIR)$(LIBDIR)/ckdeps/pages/welcome.py"

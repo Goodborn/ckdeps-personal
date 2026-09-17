@@ -7,6 +7,8 @@ from gi.repository import Gtk, Adw, GLib, Pango
 import platform
 import os
 
+from ..backend.paths import app_icon_path
+
 
 class WelcomePage(Gtk.Box):
     """First page of the wizard with animated branding."""
@@ -19,8 +21,14 @@ class WelcomePage(Gtk.Box):
         self.set_halign(Gtk.Align.CENTER)
         self.add_css_class("welcome-container")
 
-        # ─── Logo / Rocket ────────────────────────────
-        logo = Gtk.Label(label="🚀")
+        # ─── Logo ─────────────────────────────────────
+        icon_path = app_icon_path()
+        if icon_path:
+            logo = Gtk.Image.new_from_file(str(icon_path))
+            logo.set_pixel_size(72)
+        else:
+            logo = Gtk.Image.new_from_icon_name("application-x-executable-symbolic")
+            logo.set_pixel_size(56)
         logo.add_css_class("welcome-logo")
         logo.set_opacity(0)
         self.append(logo)
@@ -62,18 +70,19 @@ class WelcomePage(Gtk.Box):
         features_box.set_opacity(0)
 
         features = [
-            ("📦", "My Packages", "AUR + Flatpak picks"),
-            ("⚡", "Personal Prep", "Custom bootstrap script"),
-            ("🎨", "Handpicked Extras", "Opinionated system tweaks"),
-            ("📊", "Live Progress", "Real-time deployment tracking"),
+            ("package-x-generic-symbolic", "My Packages", "AUR + Flatpak picks"),
+            ("system-run-symbolic", "Personal Prep", "Custom bootstrap script"),
+            ("preferences-desktop-appearance-symbolic", "Handpicked Extras", "Opinionated system tweaks"),
+            ("emblem-synchronizing-symbolic", "Live Progress", "Real-time deployment tracking"),
         ]
 
-        for icon, ftitle, fdesc in features:
+        for icon_name, ftitle, fdesc in features:
             card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             card.add_css_class("feature-card")
             card.set_size_request(150, -1)
 
-            icon_label = Gtk.Label(label=icon)
+            icon_label = Gtk.Image.new_from_icon_name(icon_name)
+            icon_label.set_pixel_size(22)
             icon_label.add_css_class("feature-icon")
             card.append(icon_label)
 

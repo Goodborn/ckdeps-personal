@@ -238,7 +238,7 @@ class ProgressPage(Gtk.Box):
         self._cancel_btn.set_visible(False)
         self._progress_bar.set_fraction(1.0)
         self._current_pkg_label.set_text("Complete!")
-        self._status_label.set_text("✨ Transitioning to Summary...")
+        self._status_label.set_text("Transitioning to Summary...")
 
         # Immediate transition to Summary
         GLib.timeout_add(800, lambda: self.on_complete(self._results))

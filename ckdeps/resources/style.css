@@ -3,13 +3,48 @@
    A premium, animated dark theme
    ═══════════════════════════════════════════════════════ */
 
+/* ─── Palette ──────────────────────────────────────────
+   Single source of truth for every color used below.
+   Change the brand here instead of hunting hex codes. ─── */
+@define-color ck-purple #a855f7;
+@define-color ck-purple-light #c084fc;
+@define-color ck-purple-lighter #b87afc;
+@define-color ck-purple-pale #c4b5fd;
+@define-color ck-purple-pale2 #e9d5ff;
+
+@define-color ck-indigo #6366f1;
+@define-color ck-indigo-light #818cf8;
+
+@define-color ck-blue #0ea5e9;
+@define-color ck-blue-light #38bdf8;
+@define-color ck-blue-pale #e0f2fe;
+
+@define-color ck-green #10b981;
+@define-color ck-green-light #34d399;
+@define-color ck-green-dark #059669;
+
+@define-color ck-amber #f59e0b;
+@define-color ck-amber-light #fbbf24;
+@define-color ck-amber-lighter #fcd34d;
+@define-color ck-orange #f97316;
+
+@define-color ck-red #ef4444;
+@define-color ck-red-light #f87171;
+
+@define-color ck-text-heading #f0e7ff;
+
+@define-color ck-bg-1 #0f0b1a;
+@define-color ck-bg-2 #1a1130;
+@define-color ck-bg-3 #0d1a2e;
+@define-color ck-bg-4 #0a0f1c;
+
 /* ─── Global Overrides ─────────────────────────────── */
 window.ckdeps-window {
     background: linear-gradient(165deg,
-        #0f0b1a 0%,
-        #1a1130 35%,
-        #0d1a2e 70%,
-        #0a0f1c 100%);
+        @ck-bg-1 0%,
+        @ck-bg-2 35%,
+        @ck-bg-3 70%,
+        @ck-bg-4 100%);
     border-radius: 20px;
     border: 1px solid alpha(white, 0.08);
 }
@@ -29,15 +64,15 @@ window.ckdeps-window {
 }
 
 .header-quit-button:hover {
-    background: #ef4444;
+    background: @ck-red;
     color: white;
-    box-shadow: 0 0 20px alpha(#ef4444, 0.3);
+    box-shadow: 0 0 20px alpha(@ck-red, 0.3);
 }
 
 /* ─── Title Bar ────────────────────────────────────── */
 headerbar.ckdeps-header {
     background: alpha(@headerbar_bg_color, 0.85);
-    border-bottom: 1px solid alpha(#a855f7, 0.2);
+    border-bottom: 1px solid alpha(@ck-purple, 0.2);
     box-shadow: 0 2px 16px alpha(black, 0.3);
 }
 
@@ -53,17 +88,16 @@ headerbar.ckdeps-header title {
 }
 
 .splash-logo {
-    font-size: 84px;
     margin-bottom: 12px;
-    filter: drop-shadow(0 0 30px alpha(#a855f7, 0.4));
+    filter: drop-shadow(0 0 30px alpha(@ck-purple, 0.4));
 }
 
 .splash-title {
     font-size: 36px;
     font-weight: 900;
     letter-spacing: 6px;
-    color: #f0e7ff;
-    text-shadow: 0 0 20px alpha(#a855f7, 0.3);
+    color: @ck-text-heading;
+    text-shadow: 0 0 20px alpha(@ck-purple, 0.3);
 }
 
 .splash-progress {
@@ -77,7 +111,7 @@ headerbar.ckdeps-header title {
 }
 
 .splash-progress contents trough progress {
-    background: linear-gradient(90deg, #a855f7, #6366f1);
+    background: linear-gradient(90deg, @ck-purple, @ck-indigo);
     border-radius: 10px;
 }
 
@@ -86,7 +120,7 @@ headerbar.ckdeps-header title {
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: alpha(#c4b5fd, 0.5);
+    color: alpha(@ck-purple-pale, 0.5);
     margin-top: 12px;
 }
 
@@ -96,25 +130,21 @@ headerbar.ckdeps-header title {
 }
 
 .welcome-logo {
-    font-size: 52px;
-    font-weight: 900;
-    color: #c084fc;
-    text-shadow: 0 0 40px alpha(#a855f7, 0.5),
-                 0 0 80px alpha(#7c3aed, 0.3);
     margin-bottom: 4px;
+    filter: drop-shadow(0 0 30px alpha(@ck-purple, 0.4));
 }
 
 .welcome-title {
     font-size: 26px;
     font-weight: 800;
-    color: #f0e7ff;
+    color: @ck-text-heading;
     letter-spacing: 2px;
     margin-bottom: 2px;
 }
 
 .welcome-subtitle {
     font-size: 13px;
-    color: alpha(#c4b5fd, 0.7);
+    color: alpha(@ck-purple-pale, 0.7);
     letter-spacing: 1px;
     margin-bottom: 16px;
 }
@@ -129,7 +159,7 @@ headerbar.ckdeps-header title {
 .personal-signature {
     font-size: 10px;
     font-style: italic;
-    color: alpha(#c4b5fd, 0.4);
+    color: alpha(@ck-purple-pale, 0.4);
     letter-spacing: 1px;
     margin-bottom: 12px;
 }
@@ -140,9 +170,9 @@ headerbar.ckdeps-header title {
 
 .feature-card {
     background: linear-gradient(135deg,
-        alpha(#a855f7, 0.08) 0%,
-        alpha(#6366f1, 0.04) 100%);
-    border: 1px solid alpha(#a855f7, 0.15);
+        alpha(@ck-purple, 0.08) 0%,
+        alpha(@ck-indigo, 0.04) 100%);
+    border: 1px solid alpha(@ck-purple, 0.15);
     border-radius: 12px;
     padding: 12px;
     margin: 4px;
@@ -151,22 +181,21 @@ headerbar.ckdeps-header title {
 
 .feature-card:hover {
     background: linear-gradient(135deg,
-        alpha(#a855f7, 0.15) 0%,
-        alpha(#6366f1, 0.08) 100%);
-    border-color: alpha(#a855f7, 0.3);
-    box-shadow: 0 4px 24px alpha(#a855f7, 0.15);
+        alpha(@ck-purple, 0.15) 0%,
+        alpha(@ck-indigo, 0.08) 100%);
+    border-color: alpha(@ck-purple, 0.3);
+    box-shadow: 0 4px 24px alpha(@ck-purple, 0.15);
 }
 
 .feature-icon {
-    font-size: 22px;
-    color: #c084fc;
+    color: @ck-purple-light;
     margin-bottom: 4px;
 }
 
 .feature-title {
     font-size: 11px;
     font-weight: 700;
-    color: #e9d5ff;
+    color: @ck-purple-pale2;
     margin-bottom: 2px;
 }
 
@@ -178,17 +207,17 @@ headerbar.ckdeps-header title {
 .welcome-password-error {
     font-size: 11px;
     font-weight: 600;
-    color: alpha(#c4b5fd, 0.7);
+    color: alpha(@ck-purple-pale, 0.7);
     margin-top: 2px;
 }
 
 .welcome-password-error.is-error {
-    color: #f87171;
+    color: @ck-red-light;
 }
 
 /* ─── Begin Button ─────────────────────────────────── */
 .begin-button {
-    background: linear-gradient(135deg, #a855f7, #6366f1);
+    background: linear-gradient(135deg, @ck-purple, @ck-indigo);
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -196,22 +225,22 @@ headerbar.ckdeps-header title {
     padding: 10px 36px;
     border-radius: 12px;
     border: none;
-    box-shadow: 0 4px 24px alpha(#a855f7, 0.4),
-                0 0 0 1px alpha(#a855f7, 0.2);
+    box-shadow: 0 4px 24px alpha(@ck-purple, 0.4),
+                0 0 0 1px alpha(@ck-purple, 0.2);
     transition: all 300ms ease;
     min-width: 200px;
 }
 
 .begin-button:hover {
-    background: linear-gradient(135deg, #b87afc, #818cf8);
-    box-shadow: 0 6px 32px alpha(#a855f7, 0.5),
-                0 0 0 1px alpha(#a855f7, 0.4);
+    background: linear-gradient(135deg, @ck-purple-lighter, @ck-indigo-light);
+    box-shadow: 0 6px 32px alpha(@ck-purple, 0.5),
+                0 0 0 1px alpha(@ck-purple, 0.4);
     transform: translateY(-1px);
 }
 
 .begin-button:active {
     transform: translateY(1px);
-    box-shadow: 0 2px 12px alpha(#a855f7, 0.3);
+    box-shadow: 0 2px 12px alpha(@ck-purple, 0.3);
 }
 
 /* ─── Page Common ──────────────────────────────────── */
@@ -222,14 +251,14 @@ headerbar.ckdeps-header title {
 .page-title {
     font-size: 20px;
     font-weight: 800;
-    color: #f0e7ff;
+    color: @ck-text-heading;
     letter-spacing: 1px;
     margin-bottom: 2px;
 }
 
 .page-subtitle {
     font-size: 12px;
-    color: alpha(#c4b5fd, 0.6);
+    color: alpha(@ck-purple-pale, 0.6);
     margin-bottom: 12px;
 }
 
@@ -254,8 +283,8 @@ headerbar.ckdeps-header title {
     background: linear-gradient(145deg,
         alpha(white, 0.07) 0%,
         alpha(white, 0.04) 100%);
-    border-color: alpha(#a855f7, 0.25);
-    box-shadow: 0 2px 16px alpha(#a855f7, 0.1);
+    border-color: alpha(@ck-purple, 0.25);
+    box-shadow: 0 2px 16px alpha(@ck-purple, 0.1);
 }
 
 .package-card.compact {
@@ -285,8 +314,8 @@ headerbar.ckdeps-header title {
 }
 
 .card-info-button:hover {
-    color: #c084fc;
-    background: alpha(#a855f7, 0.15);
+    color: @ck-purple-light;
+    background: alpha(@ck-purple, 0.15);
 }
 
 .card-info-button.compact {
@@ -296,20 +325,20 @@ headerbar.ckdeps-header title {
 
 .package-card.selected {
     background: linear-gradient(145deg,
-        alpha(#a855f7, 0.12) 0%,
-        alpha(#6366f1, 0.06) 100%);
-    border-color: alpha(#a855f7, 0.35);
-    box-shadow: 0 0 20px alpha(#a855f7, 0.15);
+        alpha(@ck-purple, 0.12) 0%,
+        alpha(@ck-indigo, 0.06) 100%);
+    border-color: alpha(@ck-purple, 0.35);
+    box-shadow: 0 0 20px alpha(@ck-purple, 0.15);
 }
 
 .package-card.installed {
-    border-color: alpha(#10b981, 0.3);
+    border-color: alpha(@ck-green, 0.3);
 }
 
 .package-name {
     font-size: 12px;
     font-weight: 700;
-    color: #e9d5ff;
+    color: @ck-purple-pale2;
 }
 
 
@@ -328,27 +357,27 @@ headerbar.ckdeps-header title {
 }
 
 .badge-aur {
-    background: alpha(#a855f7, 0.15);
-    color: #c084fc;
-    border: 1px solid alpha(#a855f7, 0.2);
+    background: alpha(@ck-purple, 0.15);
+    color: @ck-purple-light;
+    border: 1px solid alpha(@ck-purple, 0.2);
 }
 
 .badge-flatpak {
-    background: alpha(#0ea5e9, 0.15);
-    color: #38bdf8;
-    border: 1px solid alpha(#0ea5e9, 0.2);
+    background: alpha(@ck-blue, 0.15);
+    color: @ck-blue-light;
+    border: 1px solid alpha(@ck-blue, 0.2);
 }
 
 .badge-pacman {
-    background: alpha(#10b981, 0.15);
-    color: #34d399;
-    border: 1px solid alpha(#10b981, 0.2);
+    background: alpha(@ck-green, 0.15);
+    color: @ck-green-light;
+    border: 1px solid alpha(@ck-green, 0.2);
 }
 
 .installed-badge {
-    background: alpha(#10b981, 0.15);
-    color: #34d399;
-    border: 1px solid alpha(#10b981, 0.2);
+    background: alpha(@ck-green, 0.15);
+    color: @ck-green-light;
+    border: 1px solid alpha(@ck-green, 0.2);
     font-size: 8px;
     font-weight: 700;
     padding: 1px 6px;
@@ -361,10 +390,10 @@ headerbar.ckdeps-header title {
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: alpha(#c4b5fd, 0.5);
+    color: alpha(@ck-purple-pale, 0.5);
     margin: 12px 0 4px 4px;
     padding-bottom: 4px;
-    border-bottom: 1px solid alpha(#a855f7, 0.1);
+    border-bottom: 1px solid alpha(@ck-purple, 0.1);
 }
 
 /* ─── Extras Cards ─────────────────────────────────── */
@@ -383,20 +412,20 @@ headerbar.ckdeps-header title {
     background: linear-gradient(145deg,
         alpha(white, 0.07) 0%,
         alpha(white, 0.04) 100%);
-    border-color: alpha(#0ea5e9, 0.25);
+    border-color: alpha(@ck-blue, 0.25);
 }
 
 .extra-card.selected {
     background: linear-gradient(145deg,
-        alpha(#0ea5e9, 0.1) 0%,
-        alpha(#6366f1, 0.05) 100%);
-    border-color: alpha(#0ea5e9, 0.35);
+        alpha(@ck-blue, 0.1) 0%,
+        alpha(@ck-indigo, 0.05) 100%);
+    border-color: alpha(@ck-blue, 0.35);
 }
 
 .extra-title {
     font-size: 12px;
     font-weight: 700;
-    color: #e0f2fe;
+    color: @ck-blue-pale;
 }
 
 .extra-desc {
@@ -417,7 +446,7 @@ headerbar.ckdeps-header title {
 }
 
 .progress-overall-bar contents trough progress {
-    background: linear-gradient(90deg, #a855f7, #6366f1, #0ea5e9);
+    background: linear-gradient(90deg, @ck-purple, @ck-indigo, @ck-blue);
     border-radius: 6px;
     min-height: 8px;
 }
@@ -431,21 +460,21 @@ headerbar.ckdeps-header title {
 .progress-current-pkg {
     font-size: 16px;
     font-weight: 800;
-    color: #c084fc;
+    color: @ck-purple-light;
     margin: 4px 0;
 }
 
 .progress-counter {
     font-size: 36px;
     font-weight: 900;
-    color: #a855f7;
+    color: @ck-purple;
     margin-bottom: 4px;
 }
 
 .progress-label {
     font-size: 11px;
     font-weight: 600;
-    color: alpha(#c4b5fd, 0.6);
+    color: alpha(@ck-purple-pale, 0.6);
     letter-spacing: 2px;
     text-transform: uppercase;
 }
@@ -462,7 +491,7 @@ headerbar.ckdeps-header title {
 .log-text {
     font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
     font-size: 10px;
-    color: alpha(#10b981, 0.8);
+    color: alpha(@ck-green, 0.8);
 }
 
 /* ─── Summary Page ─────────────────────────────────── */
@@ -470,16 +499,26 @@ headerbar.ckdeps-header title {
     padding: 20px;
 }
 
+.summary-hero-icon {
+    color: @ck-green-light;
+    filter: drop-shadow(0 0 24px alpha(@ck-green, 0.5));
+    margin-bottom: 4px;
+}
+
+.stat-icon {
+    opacity: 0.9;
+}
+
 .summary-header {
     font-size: 22px;
     font-weight: 900;
-    color: #f0e7ff;
+    color: @ck-text-heading;
     margin-bottom: 4px;
 }
 
 .summary-subheader {
     font-size: 12px;
-    color: alpha(#c4b5fd, 0.6);
+    color: alpha(@ck-purple-pale, 0.6);
     margin-bottom: 12px;
 }
 
@@ -494,18 +533,18 @@ headerbar.ckdeps-header title {
 }
 
 .summary-section-aur {
-    color: #c084fc;
-    border-bottom-color: alpha(#a855f7, 0.15);
+    color: @ck-purple-light;
+    border-bottom-color: alpha(@ck-purple, 0.15);
 }
 
 .summary-section-flatpak {
-    color: #38bdf8;
-    border-bottom-color: alpha(#0ea5e9, 0.15);
+    color: @ck-blue-light;
+    border-bottom-color: alpha(@ck-blue, 0.15);
 }
 
 .summary-section-extras {
-    color: #fbbf24;
-    border-bottom-color: alpha(#f59e0b, 0.15);
+    color: @ck-amber-light;
+    border-bottom-color: alpha(@ck-amber, 0.15);
 }
 
 .summary-item {
@@ -563,31 +602,31 @@ headerbar.ckdeps-header title {
 }
 
 .status-installed {
-    color: #34d399;
+    color: @ck-green-light;
     font-size: 10px;
     font-weight: 700;
 }
 
 .status-skipped {
-    color: #38bdf8;
+    color: @ck-blue-light;
     font-size: 10px;
     font-weight: 700;
 }
 
 .status-failed {
-    color: #f87171;
+    color: @ck-red-light;
     font-size: 10px;
     font-weight: 700;
 }
 
 .status-success {
-    color: #34d399;
+    color: @ck-green-light;
     font-size: 10px;
     font-weight: 700;
 }
 
 .status-exists {
-    color: #fbbf24;
+    color: @ck-amber-light;
     font-size: 10px;
     font-weight: 700;
 }
@@ -615,10 +654,10 @@ headerbar.ckdeps-header title {
     font-weight: 900;
 }
 
-.stat-number-installed { color: #34d399; }
-.stat-number-skipped { color: #38bdf8; }
-.stat-number-failed { color: #f87171; }
-.stat-number-extras { color: #fbbf24; }
+.stat-number-installed { color: @ck-green-light; }
+.stat-number-skipped { color: @ck-blue-light; }
+.stat-number-failed { color: @ck-red-light; }
+.stat-number-extras { color: @ck-amber-light; }
 
 .stat-label {
     font-size: 9px;
@@ -646,20 +685,20 @@ headerbar.ckdeps-header title {
 }
 
 .nav-button-primary {
-    background: linear-gradient(135deg, #a855f7, #6366f1);
+    background: linear-gradient(135deg, @ck-purple, @ck-indigo);
     color: white;
     border: none;
     border-radius: 10px;
     padding: 8px 20px;
     font-weight: 700;
     font-size: 12px;
-    box-shadow: 0 2px 16px alpha(#a855f7, 0.3);
+    box-shadow: 0 2px 16px alpha(@ck-purple, 0.3);
     transition: all 250ms ease;
 }
 
 .nav-button-primary:hover {
-    background: linear-gradient(135deg, #b87afc, #818cf8);
-    box-shadow: 0 4px 24px alpha(#a855f7, 0.4);
+    background: linear-gradient(135deg, @ck-purple-lighter, @ck-indigo-light);
+    box-shadow: 0 4px 24px alpha(@ck-purple, 0.4);
 }
 
 .nav-button-primary:disabled {
@@ -700,16 +739,16 @@ headerbar.ckdeps-header title {
 }
 
 .preview-arrow-btn:hover {
-    background: alpha(#a855f7, 0.15);
-    color: #c084fc;
-    border-color: alpha(#a855f7, 0.3);
+    background: alpha(@ck-purple, 0.15);
+    color: @ck-purple-light;
+    border-color: alpha(@ck-purple, 0.3);
 }
 
 /* ─── Select All / Deselect ────────────────────────── */
 .select-all-btn {
-    background: alpha(#a855f7, 0.1);
-    color: #c084fc;
-    border: 1px solid alpha(#a855f7, 0.2);
+    background: alpha(@ck-purple, 0.1);
+    color: @ck-purple-light;
+    border: 1px solid alpha(@ck-purple, 0.2);
     border-radius: 8px;
     padding: 4px 12px;
     font-weight: 600;
@@ -718,15 +757,15 @@ headerbar.ckdeps-header title {
 }
 
 .select-all-btn:hover {
-    background: alpha(#a855f7, 0.2);
-    border-color: alpha(#a855f7, 0.4);
+    background: alpha(@ck-purple, 0.2);
+    border-color: alpha(@ck-purple, 0.4);
 }
 
 /* ─── Spinner ──────────────────────────────────────── */
 .spinner-large {
     min-width: 48px;
     min-height: 48px;
-    color: #a855f7;
+    color: @ck-purple;
 }
 
 /* ─── Bootstrap Step ───────────────────────────────── */
@@ -739,16 +778,16 @@ headerbar.ckdeps-header title {
 
 .bootstrap-step-active {
     background: linear-gradient(145deg,
-        alpha(#a855f7, 0.1) 0%,
-        alpha(#6366f1, 0.05) 100%);
-    border-color: alpha(#a855f7, 0.3);
+        alpha(@ck-purple, 0.1) 0%,
+        alpha(@ck-indigo, 0.05) 100%);
+    border-color: alpha(@ck-purple, 0.3);
 }
 
 .bootstrap-step-done {
     background: linear-gradient(145deg,
-        alpha(#10b981, 0.08) 0%,
-        alpha(#10b981, 0.03) 100%);
-    border-color: alpha(#10b981, 0.25);
+        alpha(@ck-green, 0.08) 0%,
+        alpha(@ck-green, 0.03) 100%);
+    border-color: alpha(@ck-green, 0.25);
 }
 
 .step-title {
@@ -756,8 +795,8 @@ headerbar.ckdeps-header title {
     font-weight: 600;
 }
 
-.step-title-active { color: #c084fc; }
-.step-title-done { color: #34d399; }
+.step-title-active { color: @ck-purple-light; }
+.step-title-done { color: @ck-green-light; }
 .step-title-pending { color: alpha(white, 0.35); }
 
 .step-status {
@@ -768,22 +807,21 @@ headerbar.ckdeps-header title {
 
 /* ─── Bootstrap Glow Icons ──────────────────────────── */
 .bootstrap-glow-icon {
-    font-size: 24px;
-    color: #a855f7;
-    filter: drop-shadow(0 0 8px alpha(#a855f7, 0.6));
+    color: @ck-purple;
+    filter: drop-shadow(0 0 8px alpha(@ck-purple, 0.6));
     min-width: 32px;
     transition: all 300ms ease;
 }
 
 .bootstrap-glow-icon-active {
-    color: #c084fc;
-    filter: drop-shadow(0 0 12px alpha(#a855f7, 0.8));
+    color: @ck-purple-light;
+    filter: drop-shadow(0 0 12px alpha(@ck-purple, 0.8));
     animation: pulse-glow 1.5s ease-in-out infinite;
 }
 
 .bootstrap-glow-icon-done {
-    color: #34d399;
-    filter: drop-shadow(0 0 8px alpha(#10b981, 0.6));
+    color: @ck-green-light;
+    filter: drop-shadow(0 0 8px alpha(@ck-green, 0.6));
 }
 
 .bootstrap-glow-icon-dim {
@@ -794,9 +832,9 @@ headerbar.ckdeps-header title {
 .bootstrap-detected-badge {
     font-size: 9px;
     font-weight: 700;
-    color: #34d399;
-    background: alpha(#10b981, 0.12);
-    border: 1px solid alpha(#10b981, 0.25);
+    color: @ck-green-light;
+    background: alpha(@ck-green, 0.12);
+    border: 1px solid alpha(@ck-green, 0.25);
     border-radius: 6px;
     padding: 1px 6px;
 }
@@ -804,9 +842,9 @@ headerbar.ckdeps-header title {
 /* ─── Tip Bar ──────────────────────────────────────── */
 .tip-bar {
     background: linear-gradient(135deg,
-        alpha(#f59e0b, 0.08) 0%,
-        alpha(#f97316, 0.04) 100%);
-    border: 1px solid alpha(#f59e0b, 0.15);
+        alpha(@ck-amber, 0.08) 0%,
+        alpha(@ck-orange, 0.04) 100%);
+    border: 1px solid alpha(@ck-amber, 0.15);
     border-radius: 10px;
     padding: 8px 12px;
     margin-top: 10px;
@@ -814,7 +852,7 @@ headerbar.ckdeps-header title {
 
 .tip-text {
     font-size: 11px;
-    color: #fcd34d;
+    color: @ck-amber-lighter;
     font-weight: 500;
 }
 
@@ -839,13 +877,13 @@ headerbar.ckdeps-header title {
 
 /* ─── Scrollbar Styling ────────────────────────────── */
 scrollbar slider {
-    background: alpha(#a855f7, 0.3);
+    background: alpha(@ck-purple, 0.3);
     border-radius: 4px;
     min-width: 6px;
 }
 
 scrollbar slider:hover {
-    background: alpha(#a855f7, 0.5);
+    background: alpha(@ck-purple, 0.5);
 }
 
 scrollbar trough {
@@ -862,8 +900,8 @@ checkbutton check {
 }
 
 checkbutton:checked check {
-    background: linear-gradient(135deg, #a855f7, #6366f1);
-    border-color: alpha(#a855f7, 0.5);
+    background: linear-gradient(135deg, @ck-purple, @ck-indigo);
+    border-color: alpha(@ck-purple, 0.5);
     color: white;
 }
 
@@ -874,23 +912,23 @@ switch {
 }
 
 switch:checked {
-    background: linear-gradient(135deg, #a855f7, #6366f1);
+    background: linear-gradient(135deg, @ck-purple, @ck-indigo);
 }
 
 /* ─── Close / Finish Button ────────────────────────── */
 .finish-button {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, @ck-green, @ck-green-dark);
     color: white;
     font-size: 13px;
     font-weight: 700;
     padding: 8px 32px;
     border-radius: 12px;
     border: none;
-    box-shadow: 0 4px 24px alpha(#10b981, 0.3);
+    box-shadow: 0 4px 24px alpha(@ck-green, 0.3);
     transition: all 300ms ease;
 }
 
 .finish-button:hover {
-    background: linear-gradient(135deg, #34d399, #10b981);
-    box-shadow: 0 6px 32px alpha(#10b981, 0.4);
+    background: linear-gradient(135deg, @ck-green-light, @ck-green);
+    box-shadow: 0 6px 32px alpha(@ck-green, 0.4);
 }

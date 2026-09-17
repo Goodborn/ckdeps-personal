@@ -26,8 +26,9 @@ class SummaryPage(Gtk.Box):
         hero_box.set_halign(Gtk.Align.CENTER)
         self.append(hero_box)
 
-        check_icon = Gtk.Label(label="✨")
-        check_icon.add_css_class("welcome-logo")
+        check_icon = Gtk.Image.new_from_icon_name("emblem-ok-symbolic")
+        check_icon.set_pixel_size(56)
+        check_icon.add_css_class("summary-hero-icon")
         check_icon.set_opacity(0)
         hero_box.append(check_icon)
 
@@ -88,7 +89,7 @@ class SummaryPage(Gtk.Box):
         self.append(footer_box)
 
         # Close Button
-        self._close_btn = Gtk.Button(label="Finish Deployment  ✦")
+        self._close_btn = Gtk.Button(label="Finish Deployment")
         self._close_btn.add_css_class("finish-button")
         self._close_btn.set_halign(Gtk.Align.CENTER)
         self._close_btn.set_opacity(0)
@@ -154,20 +155,23 @@ class SummaryPage(Gtk.Box):
 
         # ─── Stats Cards ─────────────────────────────
         stats = [
-            (str(installed), "Installed", "stat-number-installed", "📦"),
-            (str(skipped), "Already Present", "stat-number-skipped", "✓"),
-            (str(failed), "Failed", "stat-number-failed", "✗"),
-            (time_str, "Total Time", "stat-number-extras", "⏱️"),
+            (str(installed), "Installed", "stat-number-installed", "package-x-generic-symbolic"),
+            (str(skipped), "Already Present", "stat-number-skipped", "emblem-ok-symbolic"),
+            (str(failed), "Failed", "stat-number-failed", "dialog-error-symbolic"),
+            (time_str, "Total Time", "stat-number-extras", "alarm-symbolic"),
         ]
 
-        for i, (num, label, css, icon) in enumerate(stats):
+        for i, (num, label, css, icon_name) in enumerate(stats):
             card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             card.add_css_class("stat-card")
             card.set_hexpand(True)
 
             top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-            
-            icon_label = Gtk.Label(label=icon)
+
+            icon_label = Gtk.Image.new_from_icon_name(icon_name)
+            icon_label.set_pixel_size(18)
+            icon_label.add_css_class("stat-icon")
+            icon_label.add_css_class(css)
             icon_label.set_margin_end(8)
             top_row.append(icon_label)
 

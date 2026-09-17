@@ -15,7 +15,6 @@ BOOTSTRAP_STEPS = [
         "description": "Highly recommended before installing anything. "
                        "Ensures your system is up to date and avoids dependency conflicts.",
         "icon": "software-update-available-symbolic",
-        "glow_icon": "✦",
         "default": True,
     },
     {
@@ -24,7 +23,6 @@ BOOTSTRAP_STEPS = [
         "description": "Required for CKDEPS to work. Installs build tools, git, "
                        "and the Flatpak runtime needed by this app.",
         "icon": "emblem-system-symbolic",
-        "glow_icon": "⚙",
         "default": True,
     },
     {
@@ -33,7 +31,6 @@ BOOTSTRAP_STEPS = [
         "description": "Needed to install packages from the AUR (Arch User Repository). "
                        "Without this, AUR packages will be unavailable on the next page.",
         "icon": "folder-download-symbolic",
-        "glow_icon": "⬇",
         "default": True,
     },
     {
@@ -42,7 +39,6 @@ BOOTSTRAP_STEPS = [
         "description": "Needed to install Flatpak apps. Without this, "
                        "Flatpak packages will be unavailable on the next page.",
         "icon": "application-x-flatpak-symbolic",
-        "glow_icon": "◆",
         "default": True,
     },
 ]
@@ -153,15 +149,15 @@ class BootstrapPage(Gtk.Box):
         GLib.idle_add(self._auto_detect)
 
     def _create_step_card(self, step, index):
-        """Create a single bootstrap step card with glow icon."""
+        """Create a single bootstrap step card with a themed status icon."""
         card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
         card.add_css_class("extra-card")
 
-        # Glow icon (emoji-based for theme matching)
         icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         icon_box.set_valign(Gtk.Align.CENTER)
 
-        icon_label = Gtk.Label(label=step["glow_icon"])
+        icon_label = Gtk.Image.new_from_icon_name(step["icon"])
+        icon_label.set_pixel_size(24)
         icon_label.add_css_class("bootstrap-glow-icon")
         icon_box.append(icon_label)
 
@@ -283,14 +279,13 @@ class BootstrapPage(Gtk.Box):
                 # Mark current as active
                 row_data["card"].remove_css_class("selected")
                 row_data["card"].add_css_class("bootstrap-step-active")
-                row_data["icon"].set_text("⟳")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-active")
                 continue
             if not found_current and row_data["card"].has_css_class("bootstrap-step-active"):
                 # Previous step done
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_text("✓")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
                 row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
@@ -318,7 +313,7 @@ class BootstrapPage(Gtk.Box):
             if row_data["card"].has_css_class("bootstrap-step-active"):
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_text("✓")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
                 row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
@@ -326,7 +321,6 @@ class BootstrapPage(Gtk.Box):
         for row_data in self._step_rows:
             if not row_data["switch"].get_active():
                 row_data["card"].set_opacity(0.35)
-                row_data["icon"].set_text("—")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-dim")
 
         if not results:
@@ -334,7 +328,7 @@ class BootstrapPage(Gtk.Box):
         else:
             all_ok = all(s for _, s in results)
             if all_ok:
-                self._status_label.set_text("✨ System bootstrap complete!")
+                self._status_label.set_text("System bootstrap complete")
             else:
                 failed = [n for n, s in results if not s]
                 self._status_label.set_text(f"⚠ Some steps had issues: {', '.join(failed)}")

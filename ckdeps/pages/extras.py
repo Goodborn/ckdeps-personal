@@ -6,6 +6,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib
 
 from ckdeps.backend.package_data import EXTRAS, ExtraConfig
+from ckdeps.backend.anim import stagger_fade_in
 
 FISH_CONFIG_PREVIEW = """# Starship prompt
 starship init fish | source
@@ -97,6 +98,7 @@ class ExtrasPage(Gtk.Box):
         title = Gtk.Label(label="System Configuration")
         title.add_css_class("page-title")
         title.set_halign(Gtk.Align.START)
+        title.set_opacity(0)
         self.append(title)
 
         subtitle = Gtk.Label(
@@ -104,14 +106,18 @@ class ExtrasPage(Gtk.Box):
         )
         subtitle.add_css_class("page-subtitle")
         subtitle.set_halign(Gtk.Align.START)
+        subtitle.set_opacity(0)
         self.append(subtitle)
 
         # ─── Extras List ─────────────────────────────
         extras_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
+        extra_cards = []
         for extra in self._extras:
             wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             card = self._create_extra_card(extra)
+            card.set_opacity(0)
+            extra_cards.append(card)
             wrapper.append(card)
 
             # Add preview revealer if this extra has one
@@ -134,6 +140,7 @@ class ExtrasPage(Gtk.Box):
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)
         nav_box.set_margin_top(12)
+        nav_box.set_opacity(0)
 
         back_btn = Gtk.Button(label="  ←  Back  ")
         back_btn.add_css_class("nav-button")
@@ -151,6 +158,9 @@ class ExtrasPage(Gtk.Box):
         nav_box.append(apply_btn)
 
         self.append(nav_box)
+
+        # ─── Entrance animation ───────────────────────
+        stagger_fade_in([title, subtitle, *extra_cards, nav_box], start_delay=80, step=60)
 
     def _create_extra_card(self, extra: ExtraConfig):
         """Create a single extra configuration card."""

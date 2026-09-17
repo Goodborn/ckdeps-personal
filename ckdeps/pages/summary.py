@@ -3,7 +3,9 @@
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib
+from gi.repository import Gtk, Adw
+
+from ..backend.anim import stagger_fade_in
 
 
 class SummaryPage(Gtk.Box):
@@ -273,9 +275,7 @@ class SummaryPage(Gtk.Box):
             self._results_box.append(log_path_label)
 
         # ─── Animate In ──────────────────────────────
-        for i, w in enumerate(self._anim_widgets):
-            GLib.timeout_add(150 + i * 100, self._fade_in, w)
-        GLib.timeout_add(150 + len(self._anim_widgets) * 100, self._fade_in, self._layout_btn)
+        stagger_fade_in(self._anim_widgets + [self._layout_btn], start_delay=150, step=90)
 
     def _on_toggle_layout(self, _btn):
         """Switch between detailed and compact view."""
@@ -419,9 +419,3 @@ class SummaryPage(Gtk.Box):
         row.append(status_label)
 
         return row
-
-    @staticmethod
-    def _fade_in(widget):
-        """Animate widget fade-in."""
-        widget.set_opacity(1)
-        return False

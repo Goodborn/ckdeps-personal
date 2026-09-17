@@ -6,6 +6,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib
 
 from ..backend.paths import app_icon_path
+from ..backend.anim import stagger_fade_in
 
 
 class SplashPage(Gtk.Box):
@@ -49,10 +50,8 @@ class SplashPage(Gtk.Box):
 
     def start_animation(self):
         """Animate the splash elements in."""
-        GLib.timeout_add(100, self._fade_in, self._logo)
-        GLib.timeout_add(300, self._fade_in, self._title)
-        GLib.timeout_add(500, self._fade_in, self._progress)
-        GLib.timeout_add(500, self._fade_in, self._status)
+        stagger_fade_in([self._logo, self._title, self._progress, self._status],
+                         start_delay=100, step=180)
 
         # Start progress pulse
         GLib.timeout_add(100, self._pulse_progress)
@@ -60,9 +59,3 @@ class SplashPage(Gtk.Box):
     def _pulse_progress(self):
         self._progress.pulse()
         return True
-
-    @staticmethod
-    def _fade_in(widget):
-        widget.set_opacity(1)
-        widget.add_css_class("animate-slide-up")
-        return False

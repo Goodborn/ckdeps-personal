@@ -3,11 +3,12 @@
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib, Pango
+from gi.repository import Gtk, Adw, Pango
 import platform
 import os
 
 from ..backend.paths import app_icon_path
+from ..backend.anim import stagger_fade_in
 
 
 class WelcomePage(Gtk.Box):
@@ -155,14 +156,7 @@ class WelcomePage(Gtk.Box):
 
         # ─── Stagger fade-in animation ───────────────
         widgets = [logo, title, subtitle, desc, features_box, sysinfo, pass_box, begin_box]
-        for i, w in enumerate(widgets):
-            GLib.timeout_add(200 + i * 120, self._fade_in, w)
-
-    @staticmethod
-    def _fade_in(widget):
-        """Animate widget fade-in via opacity."""
-        widget.set_opacity(1)
-        return False  # Don't repeat
+        stagger_fade_in(widgets, start_delay=150, step=100)
 
     def focus_entry(self):
         """Set keyboard focus to the password entry."""

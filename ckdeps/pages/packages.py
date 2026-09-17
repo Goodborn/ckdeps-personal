@@ -7,6 +7,7 @@ from gi.repository import Gtk, Adw, GLib, Pango
 
 from ..backend.package_data import ALL_PACKAGES, AUR_PACKAGES, PACMAN_PACKAGES, FLATPAK_PACKAGES, CATEGORY_COLORS
 from ..backend.icon_loader import icon_loader
+from ..backend.anim import stagger_fade_in
 
 
 class PackagesPage(Gtk.Box):
@@ -29,6 +30,7 @@ class PackagesPage(Gtk.Box):
         # ─── Header Row ──────────────────────────────
         header_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         header_row.set_margin_bottom(8)
+        header_row.set_opacity(0)
 
         header_left = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         header_left.set_hexpand(True)
@@ -126,6 +128,8 @@ class PackagesPage(Gtk.Box):
 
         self.append(nav_box)
 
+        stagger_fade_in([header_row], start_delay=60, step=60)
+
     def load_status(self, has_aur=True, has_flatpak=True):
         """Check installation status of all packages."""
         self._has_aur = has_aur
@@ -157,6 +161,7 @@ class PackagesPage(Gtk.Box):
             ("Flatpak Packages", flatpak_pkgs, self._has_flatpak),
         ]
 
+        entrance_widgets = []
         for title, pkgs, available in groups:
             if not pkgs:
                 continue
@@ -164,6 +169,7 @@ class PackagesPage(Gtk.Box):
             # Section Header
             header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
             header_box.set_halign(Gtk.Align.START)
+            header_box.set_opacity(0)
 
             header = Gtk.Label(label=title.upper())
             header.add_css_class("category-header")
@@ -206,7 +212,11 @@ class PackagesPage(Gtk.Box):
                     print(f"Error creating card for {pkg.name}: {e}")
 
             flow.set_visible(True)
+            flow.set_opacity(0)
             self._grid_box.append(flow)
+            entrance_widgets.extend([header_box, flow])
+
+        stagger_fade_in(entrance_widgets, start_delay=40, step=70)
 
     def _create_package_card(self, pkg, available=True):
         """Create a single compact package card widget with animated description revealer."""

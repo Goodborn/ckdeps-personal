@@ -17,6 +17,7 @@ from .pages.packages import PackagesPage
 from .pages.extras import ExtrasPage
 from .pages.progress import ProgressPage
 from .pages.summary import SummaryPage
+from .widgets import StepIndicator, build_ambient_background
 
 
 class CKDEPSWindow(Adw.ApplicationWindow):
@@ -25,8 +26,8 @@ class CKDEPSWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app)
         self.set_title("CKDEPS")
-        self.set_default_size(900, 620)
-        self.set_size_request(750, 500)
+        self.set_default_size(1040, 720)
+        self.set_size_request(820, 560)
         self.set_decorated(False)
         self.add_css_class("ckdeps-window")
 
@@ -78,6 +79,11 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         handle.set_child(header)
         main_box.append(handle)
 
+        # ─── Step Indicator ───────────────────────────
+        self._step_indicator = StepIndicator()
+        self._step_indicator.set_margin_bottom(4)
+        main_box.append(self._step_indicator)
+
         # ─── Main Content Stack ──────────────────────
         self._stack = Gtk.Stack()
         self._stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
@@ -122,20 +128,33 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._stack.add_named(self._summary_page, "summary")
 
         main_box.append(self._stack)
-        self.set_content(main_box)
+
+        # ─── Ambient Background ───────────────────────
+        overlay = Gtk.Overlay()
+        overlay.set_overflow(Gtk.Overflow.HIDDEN)
+        overlay.set_child(main_box)
+        build_ambient_background(overlay)
+        self.set_content(overlay)
 
         # Start on splash
+        self._step_indicator.set_visible(False)
         self._stack.set_visible_child_name("splash")
         self._splash_page.start_animation()
-        
+
         # Transition to welcome after 2.5 seconds
         GLib.timeout_add(2500, self._show_welcome)
 
     def _show_welcome(self):
         """Transition from splash to welcome."""
-        self._stack.set_visible_child_name("welcome")
+        self._step_indicator.set_visible(True)
+        self._navigate_to("welcome")
         self._welcome_page.focus_entry()
         return False
+
+    def _navigate_to(self, page_name: str):
+        """Switch the stack page and keep the step indicator in sync."""
+        self._stack.set_visible_child_name(page_name)
+        self._step_indicator.set_active(page_name)
 
     def _load_css(self):
         """Load custom CSS from resources."""
@@ -165,15 +184,15 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         """Show the bootstrap page."""
         self._terminal_log = ""
         self._installer.sudo_password = password
-        self._stack.set_visible_child_name("bootstrap")
+        self._navigate_to("bootstrap")
 
     def _go_back_to_welcome(self):
         """Go back to welcome from packages/bootstrap."""
-        self._stack.set_visible_child_name("welcome")
+        self._navigate_to("welcome")
 
     def _go_back_to_packages(self):
         """Go back to packages selection from extras."""
-        self._stack.set_visible_child_name("packages")
+        self._navigate_to("packages")
 
     def append_log(self, line):
         """Append a line to the global terminal log."""
@@ -190,19 +209,19 @@ class CKDEPSWindow(Adw.ApplicationWindow):
             self._bootstrap_page.has_flathub()
             or self._installer.has_flatpak()
         )
-        self._stack.set_visible_child_name("packages")
+        self._navigate_to("packages")
         self._packages_page.load_status(has_aur=has_aur, has_flatpak=has_flatpak)
 
     def _go_to_extras(self, selected_packages):
         """Navigate to extras page."""
         self._selected_packages = selected_packages
-        self._stack.set_visible_child_name("extras")
+        self._navigate_to("extras")
 
     def _go_to_progress(self, selected_extras):
         """Navigate to progress page and start installation."""
         self._start_time = time.time()
         self._selected_extras = selected_extras
-        self._stack.set_visible_child_name("progress")
+        self._navigate_to("progress")
 
         if self._selected_packages:
             self._progress_page.start_installation(self._selected_packages)
@@ -280,7 +299,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
             self._package_results, self._extras_results, duration,
             self._terminal_log, final_log_path,
         )
-        self._stack.set_visible_child_name("summary")
+        self._navigate_to("summary")
 
     def _request_close(self):
         """Ask the window to close through the normal close-request path,

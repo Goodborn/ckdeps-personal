@@ -189,7 +189,7 @@ class BootstrapPage(Gtk.Box):
         title_row.append(name_label)
 
         detected_label = Gtk.Label(label="detected ✓")
-        detected_label.add_css_class("bootstrap-detected-badge")
+        detected_label.add_css_class("detected-badge")
         detected_label.set_visible(False)
         title_row.append(detected_label)
 

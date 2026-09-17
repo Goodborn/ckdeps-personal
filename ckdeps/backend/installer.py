@@ -504,6 +504,34 @@ class Installer:
 
         self._run_in_thread(_work)
 
+    def check_extras_status(self, extras: list[ExtraConfig], on_complete: Callable):
+        """Check which configuration extras are already applied, so the UI
+        can show accurate state instead of blindly re-offering everything
+        as if nothing had been done yet."""
+        def _work():
+            status = {}
+            for extra in extras:
+                if extra.key == "aliases":
+                    status[extra.key] = (Path.home() / "CustomScripts" / "aliases.fish").exists()
+                elif extra.key == "fish_config":
+                    cfg = Path.home() / ".config" / "fish" / "config.fish"
+                    try:
+                        status[extra.key] = cfg.exists() and "CKDEPS" in cfg.read_text()
+                    except Exception:
+                        status[extra.key] = False
+                elif extra.key == "disable_recent":
+                    status[extra.key] = self._is_recent_files_disabled()
+                elif extra.key == "performance_mode":
+                    status[extra.key] = self._is_performance_mode_active()
+                elif extra.key == "localsend_ufw":
+                    status[extra.key] = self._ufw_has_localsend_rules()
+                else:
+                    status[extra.key] = False
+
+            GLib.idle_add(on_complete, status)
+
+        self._run_in_thread(_work)
+
     def _setup_aliases(self) -> tuple[str, str]:
         """Set up custom aliases."""
         home = Path.home()
@@ -775,15 +803,21 @@ end
 
         return ("success", "Added to Hyprland startup")
 
-    def _disable_recent_files(self) -> tuple[str, str]:
-        """Disable GNOME recent files tracking."""
+    def _is_recent_files_disabled(self) -> bool:
         try:
             result = subprocess.run(
                 ["gsettings", "get", "org.gnome.desktop.privacy",
                  "remember-recent-files"],
                 capture_output=True, text=True, timeout=5
             )
-            if "false" in result.stdout:
+            return "false" in result.stdout
+        except Exception:
+            return False
+
+    def _disable_recent_files(self) -> tuple[str, str]:
+        """Disable GNOME recent files tracking."""
+        try:
+            if self._is_recent_files_disabled():
                 return ("exists", "Already disabled")
 
             subprocess.run(
@@ -795,15 +829,35 @@ end
         except Exception as e:
             return ("failed", str(e))
 
+    def _is_performance_mode_active(self) -> bool:
+        if not shutil.which("powerprofilesctl"):
+            return False
+        try:
+            result = subprocess.run(
+                ["powerprofilesctl", "get"], capture_output=True, text=True, timeout=5
+            )
+            return "performance" in result.stdout.strip().lower()
+        except Exception:
+            return False
+
     def _set_performance_mode(self) -> tuple[str, str]:
         """Set power profile to performance."""
         if not shutil.which("powerprofilesctl"):
             return ("failed", "powerprofilesctl not found")
-        
+
+        if self._is_performance_mode_active():
+            return ("exists", "Already in performance mode")
+
         success, _ = self._run_command(["powerprofilesctl", "set", "performance"])
         if success:
             return ("success", "Performance mode enabled")
         return ("failed", "Failed to set performance mode")
+
+    def _ufw_has_localsend_rules(self) -> bool:
+        if not shutil.which("ufw"):
+            return False
+        _, output = self._run_command(["sudo", "ufw", "status", "verbose"])
+        return "53317/tcp" in output and "53317/udp" in output
 
     def _setup_localsend_ufw(self) -> tuple[str, str]:
         """Allow LocalSend (port 53317) through UFW on the local network."""
@@ -814,14 +868,14 @@ end
         if not subnet:
             return ("failed", "Could not detect local network subnet")
 
-        status, _ = self._run_command(
+        _, output = self._run_command(
             ["sudo", "ufw", "status", "verbose"]
         )
 
         existing_ok = True
         added = 0
         for proto in ("tcp", "udp"):
-            if f"53317/{proto}" in status:
+            if f"53317/{proto}" in output:
                 continue
             success, _ = self._run_command(
                 ["sudo", "ufw", "allow", "from", subnet,

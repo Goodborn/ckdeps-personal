@@ -111,6 +111,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._stack.add_named(self._packages_page, "packages")
 
         self._extras_page = ExtrasPage(
+            installer=self._installer,
             on_continue=self._go_to_progress,
             on_back=self._go_back_to_packages,
         )
@@ -210,6 +211,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         """Navigate to extras page."""
         self._selected_packages = selected_packages
         self._navigate_to("extras")
+        self._extras_page.load_status()
 
     def _go_to_progress(self, selected_extras):
         """Navigate to progress page and start installation."""

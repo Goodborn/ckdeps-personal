@@ -66,34 +66,3 @@ class StepIndicator(Gtk.Box):
             # e.g. splash — no step is current yet.
             for item in self._items.values():
                 item.add_css_class("step-upcoming")
-
-
-def build_ambient_background(overlay: Gtk.Overlay):
-    """Attach slow-drifting, softly glowing color blobs behind the main
-    content for an ambient, alive backdrop instead of a flat gradient."""
-    orb1 = Gtk.Box()
-    orb1.add_css_class("ambient-orb")
-    orb1.add_css_class("ambient-orb-1")
-    orb1.set_halign(Gtk.Align.START)
-    orb1.set_valign(Gtk.Align.START)
-    orb1.set_can_target(False)
-    overlay.add_overlay(orb1)
-    overlay.set_measure_overlay(orb1, False)
-
-    orb2 = Gtk.Box()
-    orb2.add_css_class("ambient-orb")
-    orb2.add_css_class("ambient-orb-2")
-    orb2.set_halign(Gtk.Align.END)
-    orb2.set_valign(Gtk.Align.END)
-    orb2.set_can_target(False)
-    overlay.add_overlay(orb2)
-    overlay.set_measure_overlay(orb2, False)
-
-    orb3 = Gtk.Box()
-    orb3.add_css_class("ambient-orb")
-    orb3.add_css_class("ambient-orb-3")
-    orb3.set_halign(Gtk.Align.END)
-    orb3.set_valign(Gtk.Align.START)
-    orb3.set_can_target(False)
-    overlay.add_overlay(orb3)
-    overlay.set_measure_overlay(orb3, False)

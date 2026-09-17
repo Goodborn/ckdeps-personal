@@ -17,7 +17,7 @@ from .pages.packages import PackagesPage
 from .pages.extras import ExtrasPage
 from .pages.progress import ProgressPage
 from .pages.summary import SummaryPage
-from .widgets import StepIndicator, build_ambient_background
+from .widgets import StepIndicator
 
 
 class CKDEPSWindow(Adw.ApplicationWindow):
@@ -128,13 +128,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._stack.add_named(self._summary_page, "summary")
 
         main_box.append(self._stack)
-
-        # ─── Ambient Background ───────────────────────
-        overlay = Gtk.Overlay()
-        overlay.set_overflow(Gtk.Overflow.HIDDEN)
-        overlay.set_child(main_box)
-        build_ambient_background(overlay)
-        self.set_content(overlay)
+        self.set_content(main_box)
 
         # Start on splash
         self._step_indicator.set_visible(False)

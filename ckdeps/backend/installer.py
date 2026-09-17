@@ -514,11 +514,7 @@ class Installer:
                 if extra.key == "aliases":
                     status[extra.key] = (Path.home() / "CustomScripts" / "aliases.fish").exists()
                 elif extra.key == "fish_config":
-                    cfg = Path.home() / ".config" / "fish" / "config.fish"
-                    try:
-                        status[extra.key] = cfg.exists() and "CKDEPS" in cfg.read_text()
-                    except Exception:
-                        status[extra.key] = False
+                    status[extra.key] = self._fish_config_is_complete()
                 elif extra.key == "disable_recent":
                     status[extra.key] = self._is_recent_files_disabled()
                 elif extra.key == "performance_mode":
@@ -703,6 +699,31 @@ alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/
 
         return ("success", "Fish aliases configured")
 
+    def _fish_config_is_complete(self) -> bool:
+        """Check whether config.fish already wires up everything the
+        fish_config extra would write — checked by substance (does it
+        actually init starship/thefuck/atuin/zoxide, source the aliases
+        file, and define the duration widget?), not by a literal "CKDEPS"
+        marker comment, since a hand-written config with the same content
+        should count as already done regardless of who wrote it."""
+        cfg = Path.home() / ".config" / "fish" / "config.fish"
+        if not cfg.exists():
+            return False
+        try:
+            content = cfg.read_text()
+        except Exception:
+            return False
+
+        required = (
+            "starship init fish",
+            "thefuck --alias",
+            "atuin init fish",
+            "zoxide init fish",
+            "CustomScripts/aliases.fish",
+            "__cmd_timer_start",
+        )
+        return all(marker in content for marker in required)
+
     def _setup_fish_config(self) -> tuple[str, str]:
         """Set up fish config.fish with Starship, TheFuck, Atuin, Zoxide, aliases, and command duration."""
         home = Path.home()
@@ -710,11 +731,8 @@ alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/
         fish_config = fish_dir / "config.fish"
         fish_dir.mkdir(parents=True, exist_ok=True)
 
-        # Check if already configured
-        if fish_config.exists():
-            content = fish_config.read_text()
-            if "CKDEPS" in content:
-                return ("exists", "Fish config already configured")
+        if self._fish_config_is_complete():
+            return ("exists", "Fish config already has everything this extra provides")
 
         config_content = r"""# ═══════════════════════════════════════════════════════
 # CKDEPS — Fish Shell Configuration

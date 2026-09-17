@@ -12,6 +12,7 @@ depends=(
     'python-gobject'
     'gtk4'
     'libadwaita'
+    'librsvg'
     'flatpak'
     'pacman'
 )

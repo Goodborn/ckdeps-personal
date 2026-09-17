@@ -48,13 +48,23 @@ class SplashPage(Gtk.Box):
         self._status.set_opacity(0)
         self.append(self._status)
 
+        self._pulse_timer_id = None
+
     def start_animation(self):
         """Animate the splash elements in."""
         stagger_fade_in([self._logo, self._title, self._progress, self._status],
                          start_delay=100, step=180)
 
         # Start progress pulse
-        GLib.timeout_add(100, self._pulse_progress)
+        self._pulse_timer_id = GLib.timeout_add(100, self._pulse_progress)
+
+    def stop_animation(self):
+        """Stop the progress pulse — the splash page stays alive in the
+        stack for the rest of the app's life, so without this the timer
+        would otherwise tick forever in the background."""
+        if self._pulse_timer_id is not None:
+            GLib.source_remove(self._pulse_timer_id)
+            self._pulse_timer_id = None
 
     def _pulse_progress(self):
         self._progress.pulse()

@@ -22,8 +22,8 @@
     </ul>
   </description>
   <launchable type="desktop-id">com.goodborn.ckdeps.desktop</launchable>
-  <url type="homepage">https://github.com.goodborn.ckdeps-deploy</url>
-  <url type="bugtracker">https://github.com.goodborn.ckdeps-deploy/issues</url>
+  <url type="homepage">https://github.com/goodborn/ckdeps-personal</url>
+  <url type="bugtracker">https://github.com/goodborn/ckdeps-personal/issues</url>
   <developer_name>Goodborn</developer_name>
   <content_rating type="oars-1.1" />
   <releases>
@@ -33,10 +33,4 @@
       </description>
     </release>
   </releases>
-  <screenshots>
-    <screenshot type="default">
-      <caption>Welcome screen with animated branding</caption>
-      <image>https://raw.githubusercontent.com.goodborn.ckdeps-deploy/main/screenshots/welcome.png</image>
-    </screenshot>
-  </screenshots>
 </component>

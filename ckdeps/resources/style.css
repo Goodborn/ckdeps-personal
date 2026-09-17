@@ -65,6 +65,11 @@ window.ckdeps-window {
     background: transparent;
 }
 
+.header-icon {
+    filter: drop-shadow(0 0 10px alpha(@ck-purple, 0.5));
+}
+
+.header-minimize-button,
 .header-quit-button {
     background: alpha(white, 0.03);
     color: alpha(white, 0.3);
@@ -72,6 +77,11 @@ window.ckdeps-window {
     border-radius: 10px;
     padding: 8px;
     transition: all 200ms ease;
+}
+
+.header-minimize-button:hover {
+    background: alpha(@ck-purple, 0.18);
+    color: @ck-purple-light;
 }
 
 .header-quit-button:hover {
@@ -916,6 +926,20 @@ headerbar.ckdeps-header title {
 
 .animate-slide-up {
     animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Focus Ring (keyboard navigation) ─────────────── */
+/* Ties keyboard focus into the brand palette instead of the
+   default Adwaita blue, which otherwise clashes on every
+   button, entry, switch, and check button in the app. */
+button:focus-visible,
+entry:focus-visible,
+switch:focus-visible,
+checkbutton:focus-visible,
+.package-card:focus-visible,
+.extra-card:focus-visible {
+    outline: 2px solid alpha(@ck-purple-light, 0.6);
+    outline-offset: 2px;
 }
 
 /* ─── Scrollbar Styling ────────────────────────────── */

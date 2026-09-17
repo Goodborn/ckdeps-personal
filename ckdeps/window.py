@@ -47,22 +47,41 @@ class CKDEPSWindow(Adw.ApplicationWindow):
 
         # Title widget
         from .backend.distro import friendly_name
+        from .backend.paths import app_icon_path
         title_widget = Adw.WindowTitle(
             title="CKDEPS",
             subtitle=f"{friendly_name()} KDE Personal Stuff"
         )
         # ─── Custom Header (Undecorated Window) ───────
         handle = Gtk.WindowHandle()
-        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         header.add_css_class("custom-header")
-        
+
+        # App icon
+        icon_path = app_icon_path()
+        if icon_path:
+            header_icon = Gtk.Image.new_from_file(str(icon_path))
+        else:
+            header_icon = Gtk.Image.new_from_icon_name("application-x-executable-symbolic")
+        header_icon.set_pixel_size(22)
+        header_icon.add_css_class("header-icon")
+        header.append(header_icon)
+
         # Title/Logo in header
         header.append(title_widget)
-        
+
         # Spacer
         spacer = Gtk.Box()
         spacer.set_hexpand(True)
         header.append(spacer)
+
+        # Minimize Button
+        minimize_btn = Gtk.Button()
+        minimize_btn.set_icon_name("window-minimize-symbolic")
+        minimize_btn.add_css_class("header-minimize-button")
+        minimize_btn.set_tooltip_text("Minimize Window")
+        minimize_btn.connect("clicked", lambda _: self.minimize())
+        header.append(minimize_btn)
 
         # Quit Button
         quit_btn = Gtk.Button()
@@ -144,6 +163,7 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         self._step_indicator.set_visible(True)
         self._navigate_to("welcome")
         self._welcome_page.focus_entry()
+        self._splash_page.stop_animation()
         return False
 
     def _navigate_to(self, page_name: str):
@@ -291,6 +311,9 @@ class CKDEPSWindow(Adw.ApplicationWindow):
         duration = time.time() - self._start_time
         self._extras_results = results
         final_log_path = self._installer.finalize_log()
+        # No more privileged work is coming — stop holding the sudo
+        # password in memory for the rest of the app's lifetime.
+        self._installer.forget_password()
         self._summary_page.populate(
             self._package_results, self._extras_results, duration,
             self._terminal_log, final_log_path,

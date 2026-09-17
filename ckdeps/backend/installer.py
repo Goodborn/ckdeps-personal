@@ -32,9 +32,55 @@ class Installer:
         # guard against quitting mid-operation and leaving the system
         # (e.g. pacman's db lock) in an inconsistent state.
         self.busy = False
+        self._keepalive_stop = None
+        self._keepalive_thread = None
         self.log_path = self._init_log_file()
         self._log(f"CKDEPS run started — distro: {distro_name() or 'unknown'}, "
                    f"arch_based: {is_arch_based()}")
+
+    def forget_password(self):
+        """Drop the sudo password from memory once no further privileged
+        work is expected (e.g. once we've reached the summary page)."""
+        self.sudo_password = None
+
+    # ─── Sudo Credential Keep-Alive ───────────────────────────────
+    #
+    # A run can chain many AUR builds and package installs back to back,
+    # easily outlasting sudo's default timestamp lifetime (commonly 5-15
+    # minutes). Without this, a long run can fail deep into a build with
+    # a silent "no TTY to read password" error even though the user
+    # already typed it in. Refresh the cached credential periodically
+    # for the duration of any privileged run.
+
+    def _start_sudo_keepalive(self):
+        if self._keepalive_thread is not None:
+            return
+        stop_event = threading.Event()
+        self._keepalive_stop = stop_event
+
+        def _work():
+            while not stop_event.wait(60):
+                if not self.sudo_password:
+                    continue
+                try:
+                    proc = subprocess.Popen(
+                        ["sudo", "-S", "-v"],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        text=True,
+                    )
+                    proc.communicate(self.sudo_password + "\n", timeout=15)
+                except Exception:
+                    pass
+
+        self._keepalive_thread = threading.Thread(target=_work, daemon=True)
+        self._keepalive_thread.start()
+
+    def _stop_sudo_keepalive(self):
+        if self._keepalive_stop is not None:
+            self._keepalive_stop.set()
+        self._keepalive_thread = None
 
     def cancel(self):
         """Request cancellation of current operations."""
@@ -315,6 +361,7 @@ class Installer:
         """Run selected bootstrap steps in background."""
         self._cancel = False
         self.busy = True
+        self._start_sudo_keepalive()
 
         def _work():
             results = []
@@ -340,6 +387,11 @@ class Installer:
                              os.path.join(tmpdir, "yay")], on_output
                         )
                         if success:
+                            # Prime the sudo credential right before makepkg
+                            # runs — makepkg's own internal "sudo pacman -U"
+                            # call has no TTY and no piped password, so it
+                            # only succeeds off an already-cached timestamp.
+                            self._run_command(["sudo", "-v"], on_output)
                             success, _ = self._run_command(
                                 ["bash", "-c",
                                  f"cd {os.path.join(tmpdir, 'yay')} && makepkg -si --noconfirm"],
@@ -367,6 +419,7 @@ class Installer:
                     results.append((name, success))
 
             self.busy = False
+            self._stop_sudo_keepalive()
             GLib.idle_add(on_complete, results)
 
         self._run_in_thread(_work)
@@ -410,6 +463,7 @@ class Installer:
         """Install multiple packages sequentially in background."""
         self._cancel = False
         self.busy = True
+        self._start_sudo_keepalive()
 
         def _work():
             results = []
@@ -456,6 +510,7 @@ class Installer:
                             GLib.idle_add(on_output, f"Warning: failed to install dependency {dep}")
 
             self.busy = False
+            self._stop_sudo_keepalive()
             GLib.idle_add(on_all_complete, results)
 
         self._run_in_thread(_work)
@@ -470,6 +525,7 @@ class Installer:
             newly_installed = []
         self._cancel = False
         self.busy = True
+        self._start_sudo_keepalive()
 
         def _work():
             results = []
@@ -500,6 +556,8 @@ class Installer:
                 results.append(("Java Runtime (Bolt)", result))
                 GLib.idle_add(on_extra_complete, "Java Runtime (Bolt)", result)
 
+            self.busy = False
+            self._stop_sudo_keepalive()
             GLib.idle_add(on_all_complete, results)
 
         self._run_in_thread(_work)
@@ -939,12 +997,45 @@ end
 
     # ─── Status Check All Packages ───────────────────────────────
 
+    def _pacman_installed_set(self) -> set[str]:
+        """All installed pacman package names, queried once instead of
+        once per package — `pacman -Qi` per package is a full DB scan
+        each time and dominates the packages-page loading spinner."""
+        try:
+            result = subprocess.run(
+                ["pacman", "-Qq"], capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                return set(result.stdout.split())
+        except Exception:
+            pass
+        return set()
+
+    def _flatpak_installed_set(self) -> set[str]:
+        """All installed Flatpak app IDs, queried once instead of once
+        per Flatpak package."""
+        try:
+            result = subprocess.run(
+                ["flatpak", "list", "--app", "--columns=application"],
+                capture_output=True, text=True, timeout=15
+            )
+            if result.returncode == 0:
+                return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+        except Exception:
+            pass
+        return set()
+
     def check_all_status(self, packages: list[Package],
                          on_complete: Callable):
         """Check installation status of all packages in background."""
         def _work():
+            pacman_set = self._pacman_installed_set()
+            flatpak_set = self._flatpak_installed_set()
             for pkg in packages:
-                pkg.installed = self.is_installed(pkg)
+                installed = pkg.name in pacman_set
+                if not installed and pkg.flatpak_id:
+                    installed = pkg.flatpak_id in flatpak_set
+                pkg.installed = installed
             GLib.idle_add(on_complete, packages)
 
         self._run_in_thread(_work)

@@ -626,7 +626,7 @@ end
         if not subnet:
             return ("failed", "Could not detect local network subnet")
 
-        status, _ = self._run_command(
+        _, status = self._run_command(
             ["sudo", "ufw", "status", "verbose"]
         )
 

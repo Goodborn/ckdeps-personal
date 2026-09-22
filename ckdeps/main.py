@@ -39,11 +39,20 @@ class CKDEPSApp(Adw.Application):
         about_action.connect("activate", self._on_about)
         self.add_action(about_action)
 
-        # Quit action
+        # Quit action — route through the active window's close-request so
+        # Ctrl+Q respects the same in-progress-install guard as the header
+        # quit button and the window manager's own close signal.
         quit_action = Gio.SimpleAction.new("quit", None)
-        quit_action.connect("activate", lambda *_: self.quit())
+        quit_action.connect("activate", self._on_quit_action)
         self.add_action(quit_action)
         self.set_accels_for_action("app.quit", ["<Control>q"])
+
+    def _on_quit_action(self, *_args):
+        win = self.props.active_window
+        if win:
+            win.close()
+        else:
+            self.quit()
 
     def _on_about(self, *_args):
         """Show about dialog."""

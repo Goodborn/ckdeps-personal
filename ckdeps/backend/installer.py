@@ -1,9 +1,11 @@
 """Backend installer — runs all shell commands in background threads."""
 
+import socket
 import subprocess
 import shutil
 import os
 import threading
+from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -12,6 +14,7 @@ gi.require_version("GLib", "2.0")
 from gi.repository import GLib
 
 from .package_data import Package, ExtraConfig
+from .distro import is_arch_based, distro_name
 
 # Dependencies that need to be installed alongside certain packages
 PACKAGE_DEPENDENCIES = {
@@ -25,10 +28,175 @@ class Installer:
     def __init__(self):
         self._cancel = False
         self.sudo_password = None
+        # True while a bootstrap/install/extras run is active — used to
+        # guard against quitting mid-operation and leaving the system
+        # (e.g. pacman's db lock) in an inconsistent state.
+        self.busy = False
+        self.log_path = self._init_log_file()
+        self._log(f"CKDEPS run started — distro: {distro_name() or 'unknown'}, "
+                   f"arch_based: {is_arch_based()}")
 
     def cancel(self):
         """Request cancellation of current operations."""
         self._cancel = True
+
+    @property
+    def was_cancelled(self) -> bool:
+        """Whether the most recent run was stopped via cancel(). Callers that
+        chain stages (packages -> extras) should check this before starting
+        the next stage, since bootstrap/install/run_extras each reset the
+        flag for themselves at the start of their own run."""
+        return self._cancel
+
+    def reset_cancel(self):
+        """Clear a pending cancellation so the next stage can run normally."""
+        self._cancel = False
+
+    # ─── Persistent Logging ──────────────────────────────────────
+    #
+    # A live log is written incrementally to a hidden XDG-state location
+    # while a run is in progress, so a crash mid-run is still diagnosable.
+    # Once a run finishes cleanly, finalize_log() copies it to a visible
+    # folder in the user's home directory for easy access.
+
+    FINAL_LOG_DIR = Path.home() / "ckdeps-logs"
+
+    def _init_log_file(self) -> Optional[Path]:
+        """Create a per-run live log file under ~/.local/state."""
+        try:
+            log_dir = Path.home() / ".local" / "state" / "ckdeps" / "logs"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            self._prune_old_logs(log_dir)
+
+            path = log_dir / f"ckdeps-{datetime.now():%Y%m%d-%H%M%S}.log"
+            path.touch()
+            return path
+        except Exception:
+            return None
+
+    @staticmethod
+    def _prune_old_logs(log_dir: Path, keep: int = 10):
+        """Keep only the most recent `keep` log files in a directory."""
+        try:
+            existing = sorted(log_dir.glob("ckdeps-*.log"))
+            for old in existing[:-(keep - 1)] if keep > 1 else existing:
+                old.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    def _log(self, line: str):
+        """Best-effort append to the live log file."""
+        if not self.log_path:
+            return
+        try:
+            with open(self.log_path, "a") as f:
+                f.write(line + "\n")
+        except Exception:
+            pass
+
+    def finalize_log(self) -> Optional[Path]:
+        """Copy the live log to a visible folder in the user's home
+        directory (~/ckdeps-logs/) once a run completes. Returns the final
+        path, or the hidden live-log path if finalizing fails."""
+        if not self.log_path:
+            return None
+        try:
+            self.FINAL_LOG_DIR.mkdir(parents=True, exist_ok=True)
+            self._prune_old_logs(self.FINAL_LOG_DIR)
+            final_path = self.FINAL_LOG_DIR / self.log_path.name
+            shutil.copy2(self.log_path, final_path)
+            return final_path
+        except Exception:
+            return self.log_path
+
+    # ─── Preflight Checks ─────────────────────────────────────────
+
+    def verify_sudo_password(self, password: str, on_result: Callable):
+        """Validate a sudo password without running any privileged command.
+        Prevents silently blasting through every install step with a wrong
+        password and only finding out from a wall of failures."""
+        def _work():
+            try:
+                proc = subprocess.Popen(
+                    ["sudo", "-S", "-k", "-v"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+                try:
+                    proc.communicate(password + "\n", timeout=15)
+                    ok = proc.returncode == 0
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.communicate()
+                    ok = False
+            except Exception:
+                ok = False
+            GLib.idle_add(on_result, ok)
+
+        self._run_in_thread(_work)
+
+    def check_environment(self, on_result: Callable):
+        """Run best-effort environment sanity checks in the background and
+        report back a list of (level, message) issues, where level is
+        'error' or 'warning'. Nothing here is fatal by itself — the caller
+        decides whether to block or let the user proceed."""
+        def _work():
+            issues = []
+
+            if not is_arch_based():
+                issues.append((
+                    "error",
+                    f"This doesn't look like an Arch-based system (detected: "
+                    f"{distro_name() or 'unknown'}). CKDEPS drives pacman/yay "
+                    f"directly and may fail or misbehave here."
+                ))
+
+            if not self._has_network():
+                issues.append((
+                    "warning",
+                    "No internet connection detected — package installs will "
+                    "likely fail."
+                ))
+
+            free_gb = self._free_disk_gb("/")
+            if free_gb is not None and free_gb < 2:
+                issues.append((
+                    "warning",
+                    f"Low disk space: only {free_gb:.1f} GB free on /."
+                ))
+
+            if Path("/var/lib/pacman/db.lck").exists():
+                issues.append((
+                    "warning",
+                    "A pacman lock file exists (/var/lib/pacman/db.lck) — "
+                    "another package manager may be running, or a previous "
+                    "run crashed without cleaning up."
+                ))
+
+            for level, msg in issues:
+                self._log(f"[preflight:{level}] {msg}")
+
+            GLib.idle_add(on_result, issues)
+
+        self._run_in_thread(_work)
+
+    def _has_network(self, timeout: float = 3.0) -> bool:
+        for host, port in (("archlinux.org", 443), ("1.1.1.1", 443)):
+            try:
+                socket.create_connection((host, port), timeout=timeout).close()
+                return True
+            except OSError:
+                continue
+        return False
+
+    def _free_disk_gb(self, path: str) -> Optional[float]:
+        try:
+            usage = shutil.disk_usage(path)
+            return usage.free / (1024 ** 3)
+        except Exception:
+            return None
 
     # ─── Status Checks ───────────────────────────────────────────
 
@@ -110,23 +278,32 @@ class Installer:
 
             output_lines = []
             for line in iter(process.stdout.readline, ""):
+                text = line.rstrip()
+                output_lines.append(text)
+                self._log(text)
+                if on_output:
+                    GLib.idle_add(on_output, text)
                 if self._cancel:
                     process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait()
                     return False, "Cancelled"
-                output_lines.append(line.rstrip())
-                if on_output:
-                    GLib.idle_add(on_output, line.rstrip())
 
             process.wait()
             return process.returncode == 0, "\n".join(output_lines)
 
         except FileNotFoundError:
             msg = f"Command not found: {cmd[0]}"
+            self._log(msg)
             if on_output:
                 GLib.idle_add(on_output, msg)
             return False, msg
         except Exception as e:
             msg = f"Error: {str(e)}"
+            self._log(msg)
             if on_output:
                 GLib.idle_add(on_output, msg)
             return False, msg
@@ -136,6 +313,9 @@ class Installer:
     def bootstrap_system(self, selected_steps: list[str], on_step: Callable,
                          on_output: Callable, on_complete: Callable):
         """Run selected bootstrap steps in background."""
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
             step_map = {
@@ -186,6 +366,7 @@ class Installer:
                     success, _ = self._run_command(cmd, on_output)
                     results.append((name, success))
 
+            self.busy = False
             GLib.idle_add(on_complete, results)
 
         self._run_in_thread(_work)
@@ -227,6 +408,9 @@ class Installer:
                                     on_package_complete: Callable,
                                     on_all_complete: Callable):
         """Install multiple packages sequentially in background."""
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
             for i, pkg in enumerate(packages):
@@ -271,6 +455,7 @@ class Installer:
                         if not dep_success:
                             GLib.idle_add(on_output, f"Warning: failed to install dependency {dep}")
 
+            self.busy = False
             GLib.idle_add(on_all_complete, results)
 
         self._run_in_thread(_work)
@@ -283,6 +468,9 @@ class Installer:
         """Run selected configuration extras in background."""
         if newly_installed is None:
             newly_installed = []
+        self._cancel = False
+        self.busy = True
+
         def _work():
             results = []
 
@@ -313,6 +501,30 @@ class Installer:
                 GLib.idle_add(on_extra_complete, "Java Runtime (Bolt)", result)
 
             GLib.idle_add(on_all_complete, results)
+
+        self._run_in_thread(_work)
+
+    def check_extras_status(self, extras: list[ExtraConfig], on_complete: Callable):
+        """Check which configuration extras are already applied, so the UI
+        can show accurate state instead of blindly re-offering everything
+        as if nothing had been done yet."""
+        def _work():
+            status = {}
+            for extra in extras:
+                if extra.key == "aliases":
+                    status[extra.key] = (Path.home() / "CustomScripts" / "aliases.fish").exists()
+                elif extra.key == "fish_config":
+                    status[extra.key] = self._fish_config_is_complete()
+                elif extra.key == "disable_recent":
+                    status[extra.key] = self._is_recent_files_disabled()
+                elif extra.key == "performance_mode":
+                    status[extra.key] = self._is_performance_mode_active()
+                elif extra.key == "localsend_ufw":
+                    status[extra.key] = self._ufw_has_localsend_rules()
+                else:
+                    status[extra.key] = False
+
+            GLib.idle_add(on_complete, status)
 
         self._run_in_thread(_work)
 
@@ -487,6 +699,31 @@ alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/
 
         return ("success", "Fish aliases configured")
 
+    def _fish_config_is_complete(self) -> bool:
+        """Check whether config.fish already wires up everything the
+        fish_config extra would write — checked by substance (does it
+        actually init starship/thefuck/atuin/zoxide, source the aliases
+        file, and define the duration widget?), not by a literal "CKDEPS"
+        marker comment, since a hand-written config with the same content
+        should count as already done regardless of who wrote it."""
+        cfg = Path.home() / ".config" / "fish" / "config.fish"
+        if not cfg.exists():
+            return False
+        try:
+            content = cfg.read_text()
+        except Exception:
+            return False
+
+        required = (
+            "starship init fish",
+            "thefuck --alias",
+            "atuin init fish",
+            "zoxide init fish",
+            "CustomScripts/aliases.fish",
+            "__cmd_timer_start",
+        )
+        return all(marker in content for marker in required)
+
     def _setup_fish_config(self) -> tuple[str, str]:
         """Set up fish config.fish with Starship, TheFuck, Atuin, Zoxide, aliases, and command duration."""
         home = Path.home()
@@ -494,11 +731,8 @@ alias editalias='micro ~/CustomScripts/aliases.fish; and source ~/CustomScripts/
         fish_config = fish_dir / "config.fish"
         fish_dir.mkdir(parents=True, exist_ok=True)
 
-        # Check if already configured
-        if fish_config.exists():
-            content = fish_config.read_text()
-            if "CKDEPS" in content:
-                return ("exists", "Fish config already configured")
+        if self._fish_config_is_complete():
+            return ("exists", "Fish config already has everything this extra provides")
 
         config_content = r"""# ═══════════════════════════════════════════════════════
 # CKDEPS — Fish Shell Configuration
@@ -587,15 +821,21 @@ end
 
         return ("success", "Added to Hyprland startup")
 
-    def _disable_recent_files(self) -> tuple[str, str]:
-        """Disable GNOME recent files tracking."""
+    def _is_recent_files_disabled(self) -> bool:
         try:
             result = subprocess.run(
                 ["gsettings", "get", "org.gnome.desktop.privacy",
                  "remember-recent-files"],
                 capture_output=True, text=True, timeout=5
             )
-            if "false" in result.stdout:
+            return "false" in result.stdout
+        except Exception:
+            return False
+
+    def _disable_recent_files(self) -> tuple[str, str]:
+        """Disable GNOME recent files tracking."""
+        try:
+            if self._is_recent_files_disabled():
                 return ("exists", "Already disabled")
 
             subprocess.run(
@@ -607,15 +847,35 @@ end
         except Exception as e:
             return ("failed", str(e))
 
+    def _is_performance_mode_active(self) -> bool:
+        if not shutil.which("powerprofilesctl"):
+            return False
+        try:
+            result = subprocess.run(
+                ["powerprofilesctl", "get"], capture_output=True, text=True, timeout=5
+            )
+            return "performance" in result.stdout.strip().lower()
+        except Exception:
+            return False
+
     def _set_performance_mode(self) -> tuple[str, str]:
         """Set power profile to performance."""
         if not shutil.which("powerprofilesctl"):
             return ("failed", "powerprofilesctl not found")
-        
+
+        if self._is_performance_mode_active():
+            return ("exists", "Already in performance mode")
+
         success, _ = self._run_command(["powerprofilesctl", "set", "performance"])
         if success:
             return ("success", "Performance mode enabled")
         return ("failed", "Failed to set performance mode")
+
+    def _ufw_has_localsend_rules(self) -> bool:
+        if not shutil.which("ufw"):
+            return False
+        _, output = self._run_command(["sudo", "ufw", "status", "verbose"])
+        return "53317/tcp" in output and "53317/udp" in output
 
     def _setup_localsend_ufw(self) -> tuple[str, str]:
         """Allow LocalSend (port 53317) through UFW on the local network."""
@@ -626,14 +886,14 @@ end
         if not subnet:
             return ("failed", "Could not detect local network subnet")
 
-        _, status = self._run_command(
+        _, output = self._run_command(
             ["sudo", "ufw", "status", "verbose"]
         )
 
         existing_ok = True
         added = 0
         for proto in ("tcp", "udp"):
-            if f"53317/{proto}" in status:
+            if f"53317/{proto}" in output:
                 continue
             success, _ = self._run_command(
                 ["sudo", "ufw", "allow", "from", subnet,

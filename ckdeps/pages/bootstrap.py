@@ -7,6 +7,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib
 
+from ..backend.anim import stagger_fade_in
+
 
 BOOTSTRAP_STEPS = [
     {
@@ -15,7 +17,6 @@ BOOTSTRAP_STEPS = [
         "description": "Highly recommended before installing anything. "
                        "Ensures your system is up to date and avoids dependency conflicts.",
         "icon": "software-update-available-symbolic",
-        "glow_icon": "✦",
         "default": True,
     },
     {
@@ -24,7 +25,6 @@ BOOTSTRAP_STEPS = [
         "description": "Required for CKDEPS to work. Installs build tools, git, "
                        "and the Flatpak runtime needed by this app.",
         "icon": "emblem-system-symbolic",
-        "glow_icon": "⚙",
         "default": True,
     },
     {
@@ -33,7 +33,6 @@ BOOTSTRAP_STEPS = [
         "description": "Needed to install packages from the AUR (Arch User Repository). "
                        "Without this, AUR packages will be unavailable on the next page.",
         "icon": "folder-download-symbolic",
-        "glow_icon": "⬇",
         "default": True,
     },
     {
@@ -42,7 +41,6 @@ BOOTSTRAP_STEPS = [
         "description": "Needed to install Flatpak apps. Without this, "
                        "Flatpak packages will be unavailable on the next page.",
         "icon": "application-x-flatpak-symbolic",
-        "glow_icon": "◆",
         "default": True,
     },
 ]
@@ -94,6 +92,7 @@ class BootstrapPage(Gtk.Box):
         title = Gtk.Label(label="First Steps")
         title.add_css_class("page-title")
         title.set_halign(Gtk.Align.START)
+        title.set_opacity(0)
         self.append(title)
 
         subtitle = Gtk.Label(
@@ -101,14 +100,18 @@ class BootstrapPage(Gtk.Box):
         )
         subtitle.add_css_class("page-subtitle")
         subtitle.set_halign(Gtk.Align.START)
+        subtitle.set_opacity(0)
         self.append(subtitle)
 
         # ─── Steps List ──────────────────────────────
         steps_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         steps_box.set_vexpand(True)
 
+        step_cards = []
         for i, step in enumerate(BOOTSTRAP_STEPS):
             card = self._create_step_card(step, i)
+            card.set_opacity(0)
+            step_cards.append(card)
             steps_box.append(card)
 
         self.append(steps_box)
@@ -118,6 +121,7 @@ class BootstrapPage(Gtk.Box):
         status_box.set_halign(Gtk.Align.CENTER)
         status_box.set_margin_top(4)
         status_box.set_margin_bottom(8)
+        status_box.set_opacity(0)
 
         self._spinner = Gtk.Spinner()
         self._spinner.add_css_class("spinner-large")
@@ -135,6 +139,13 @@ class BootstrapPage(Gtk.Box):
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)
         nav_box.set_margin_top(8)
+        nav_box.set_opacity(0)
+
+        self._cancel_btn = Gtk.Button(label="Cancel")
+        self._cancel_btn.add_css_class("nav-button-skip")
+        self._cancel_btn.connect("clicked", self._on_cancel_clicked)
+        self._cancel_btn.set_visible(False)
+        nav_box.append(self._cancel_btn)
 
         self._start_btn = Gtk.Button(label="Continue  →")
         self._start_btn.add_css_class("nav-button-primary")
@@ -143,19 +154,23 @@ class BootstrapPage(Gtk.Box):
 
         self.append(nav_box)
 
+        # ─── Entrance animation ───────────────────────
+        stagger_fade_in([title, subtitle, *step_cards, status_box, nav_box],
+                         start_delay=80, step=70)
+
         # ─── Auto-detect installed ───────────────────
         GLib.idle_add(self._auto_detect)
 
     def _create_step_card(self, step, index):
-        """Create a single bootstrap step card with glow icon."""
+        """Create a single bootstrap step card with a themed status icon."""
         card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
         card.add_css_class("extra-card")
 
-        # Glow icon (emoji-based for theme matching)
         icon_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         icon_box.set_valign(Gtk.Align.CENTER)
 
-        icon_label = Gtk.Label(label=step["glow_icon"])
+        icon_label = Gtk.Image.new_from_icon_name(step["icon"])
+        icon_label.set_pixel_size(24)
         icon_label.add_css_class("bootstrap-glow-icon")
         icon_box.append(icon_label)
 
@@ -174,7 +189,7 @@ class BootstrapPage(Gtk.Box):
         title_row.append(name_label)
 
         detected_label = Gtk.Label(label="detected ✓")
-        detected_label.add_css_class("bootstrap-detected-badge")
+        detected_label.add_css_class("detected-badge")
         detected_label.set_visible(False)
         title_row.append(detected_label)
 
@@ -252,6 +267,8 @@ class BootstrapPage(Gtk.Box):
         for sw in self._switches.values():
             sw.set_sensitive(False)
         self._start_btn.set_visible(False)
+        self._cancel_btn.set_visible(True)
+        self._cancel_btn.set_sensitive(True)
         self._spinner.set_spinning(True)
         self._spinner.set_visible(True)
         self._status_label.set_text("Starting bootstrap...")
@@ -275,14 +292,13 @@ class BootstrapPage(Gtk.Box):
                 # Mark current as active
                 row_data["card"].remove_css_class("selected")
                 row_data["card"].add_css_class("bootstrap-step-active")
-                row_data["icon"].set_text("⟳")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-active")
                 continue
             if not found_current and row_data["card"].has_css_class("bootstrap-step-active"):
                 # Previous step done
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_text("✓")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
                 row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
@@ -292,17 +308,25 @@ class BootstrapPage(Gtk.Box):
         if hasattr(window, "append_log"):
             window.append_log(line)
 
+    def _on_cancel_clicked(self, _btn):
+        """Stop bootstrap after the current step finishes."""
+        self._cancel_btn.set_sensitive(False)
+        self._cancel_btn.set_label("Cancelling...")
+        self._status_label.set_text("Stopping after the current step...")
+        self.installer.cancel()
+
     def _on_all_complete(self, results):
         """Called when all bootstrap steps are done."""
         self._spinner.set_spinning(False)
         self._spinner.set_visible(False)
+        self._cancel_btn.set_visible(False)
 
         # Mark any active step as done
         for row_data in self._step_rows:
             if row_data["card"].has_css_class("bootstrap-step-active"):
                 row_data["card"].remove_css_class("bootstrap-step-active")
                 row_data["card"].add_css_class("bootstrap-step-done")
-                row_data["icon"].set_text("✓")
+                row_data["icon"].set_from_icon_name("emblem-ok-symbolic")
                 row_data["icon"].remove_css_class("bootstrap-glow-icon-active")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-done")
 
@@ -310,7 +334,6 @@ class BootstrapPage(Gtk.Box):
         for row_data in self._step_rows:
             if not row_data["switch"].get_active():
                 row_data["card"].set_opacity(0.35)
-                row_data["icon"].set_text("—")
                 row_data["icon"].add_css_class("bootstrap-glow-icon-dim")
 
         if not results:
@@ -318,7 +341,7 @@ class BootstrapPage(Gtk.Box):
         else:
             all_ok = all(s for _, s in results)
             if all_ok:
-                self._status_label.set_text("✨ System bootstrap complete!")
+                self._status_label.set_text("System bootstrap complete")
             else:
                 failed = [n for n, s in results if not s]
                 self._status_label.set_text(f"⚠ Some steps had issues: {', '.join(failed)}")

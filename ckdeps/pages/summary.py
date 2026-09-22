@@ -3,7 +3,9 @@
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, GLib
+from gi.repository import Gtk, Adw
+
+from ..backend.anim import stagger_fade_in
 
 
 class SummaryPage(Gtk.Box):
@@ -18,6 +20,7 @@ class SummaryPage(Gtk.Box):
         self._extras_results = []
         self._duration = 0
         self._log = ""
+        self._log_path = None
 
         # ─── Hero Section ────────────────────────────
         hero_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
@@ -25,8 +28,9 @@ class SummaryPage(Gtk.Box):
         hero_box.set_halign(Gtk.Align.CENTER)
         self.append(hero_box)
 
-        check_icon = Gtk.Label(label="✨")
-        check_icon.add_css_class("welcome-logo")
+        check_icon = Gtk.Image.new_from_icon_name("emblem-ok-symbolic")
+        check_icon.set_pixel_size(56)
+        check_icon.add_css_class("summary-hero-icon")
         check_icon.set_opacity(0)
         hero_box.append(check_icon)
 
@@ -87,7 +91,7 @@ class SummaryPage(Gtk.Box):
         self.append(footer_box)
 
         # Close Button
-        self._close_btn = Gtk.Button(label="Finish Deployment  ✦")
+        self._close_btn = Gtk.Button(label="Finish Deployment")
         self._close_btn.add_css_class("finish-button")
         self._close_btn.set_halign(Gtk.Align.CENTER)
         self._close_btn.set_opacity(0)
@@ -106,12 +110,13 @@ class SummaryPage(Gtk.Box):
             self._results_title, self._scroll, self._close_btn, signature
         ]
 
-    def populate(self, package_results, extras_results, duration=0, log=""):
+    def populate(self, package_results, extras_results, duration=0, log="", log_path=None):
         """Fill in the summary data and animate."""
         self._package_results = package_results
         self._extras_results = extras_results
         self._duration = duration
         self._log = log
+        self._log_path = log_path
         self._build_report()
 
     def _build_report(self):
@@ -152,20 +157,23 @@ class SummaryPage(Gtk.Box):
 
         # ─── Stats Cards ─────────────────────────────
         stats = [
-            (str(installed), "Installed", "stat-number-installed", "📦"),
-            (str(skipped), "Already Present", "stat-number-skipped", "✓"),
-            (str(failed), "Failed", "stat-number-failed", "✗"),
-            (time_str, "Total Time", "stat-number-extras", "⏱️"),
+            (str(installed), "Installed", "stat-number-installed", "package-x-generic-symbolic"),
+            (str(skipped), "Already Present", "stat-number-skipped", "emblem-ok-symbolic"),
+            (str(failed), "Failed", "stat-number-failed", "dialog-error-symbolic"),
+            (time_str, "Total Time", "stat-number-extras", "alarm-symbolic"),
         ]
 
-        for i, (num, label, css, icon) in enumerate(stats):
+        for i, (num, label, css, icon_name) in enumerate(stats):
             card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             card.add_css_class("stat-card")
             card.set_hexpand(True)
 
             top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-            
-            icon_label = Gtk.Label(label=icon)
+
+            icon_label = Gtk.Image.new_from_icon_name(icon_name)
+            icon_label.set_pixel_size(18)
+            icon_label.add_css_class("stat-icon")
+            icon_label.add_css_class(css)
             icon_label.set_margin_end(8)
             top_row.append(icon_label)
 
@@ -256,10 +264,18 @@ class SummaryPage(Gtk.Box):
             log_expander.set_child(log_scroll)
             self._results_box.append(log_expander)
 
+        if self._log_path:
+            log_path_label = Gtk.Label(
+                label=f"Full log saved to: {self._log_path}"
+            )
+            log_path_label.add_css_class("summary-log-path")
+            log_path_label.set_halign(Gtk.Align.START)
+            log_path_label.set_selectable(True)
+            log_path_label.set_margin_top(6)
+            self._results_box.append(log_path_label)
+
         # ─── Animate In ──────────────────────────────
-        for i, w in enumerate(self._anim_widgets):
-            GLib.timeout_add(150 + i * 100, self._fade_in, w)
-        GLib.timeout_add(150 + len(self._anim_widgets) * 100, self._fade_in, self._layout_btn)
+        stagger_fade_in(self._anim_widgets + [self._layout_btn], start_delay=150, step=90)
 
     def _on_toggle_layout(self, _btn):
         """Switch between detailed and compact view."""
@@ -403,9 +419,3 @@ class SummaryPage(Gtk.Box):
         row.append(status_label)
 
         return row
-
-    @staticmethod
-    def _fade_in(widget):
-        """Animate widget fade-in."""
-        widget.set_opacity(1)
-        return False

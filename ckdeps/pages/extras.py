@@ -6,6 +6,7 @@ gi.require_version("Adw", "1")
 from gi.repository import Gtk, Adw, GLib
 
 from ckdeps.backend.package_data import EXTRAS, ExtraConfig
+from ckdeps.backend.anim import stagger_fade_in
 
 FISH_CONFIG_PREVIEW = """# Starship prompt
 starship init fish | source
@@ -80,9 +81,10 @@ PREVIEW_EXTRAS = {
 class ExtrasPage(Gtk.Box):
     """Configuration extras selection page."""
 
-    def __init__(self, on_continue: callable, on_back: callable):
+    def __init__(self, installer, on_continue: callable, on_back: callable):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.add_css_class("page-container")
+        self.installer = installer
         self.on_continue = on_continue
         self.on_back = on_back
         self._extras = [ExtraConfig(
@@ -90,6 +92,8 @@ class ExtrasPage(Gtk.Box):
             icon_name=e.icon_name
         ) for e in EXTRAS]
         self._switches = {}
+        self._cards = {}
+        self._detected_badges = {}
         self._preview_revealers = {}
         self._arrow_buttons = {}
 
@@ -97,6 +101,7 @@ class ExtrasPage(Gtk.Box):
         title = Gtk.Label(label="System Configuration")
         title.add_css_class("page-title")
         title.set_halign(Gtk.Align.START)
+        title.set_opacity(0)
         self.append(title)
 
         subtitle = Gtk.Label(
@@ -104,15 +109,18 @@ class ExtrasPage(Gtk.Box):
         )
         subtitle.add_css_class("page-subtitle")
         subtitle.set_halign(Gtk.Align.START)
+        subtitle.set_opacity(0)
         self.append(subtitle)
 
         # ─── Extras List ─────────────────────────────
         extras_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        extras_box.set_vexpand(True)
 
+        extra_cards = []
         for extra in self._extras:
             wrapper = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
             card = self._create_extra_card(extra)
+            card.set_opacity(0)
+            extra_cards.append(card)
             wrapper.append(card)
 
             # Add preview revealer if this extra has one
@@ -123,12 +131,19 @@ class ExtrasPage(Gtk.Box):
 
             extras_box.append(wrapper)
 
-        self.append(extras_box)
+        # The window has a fixed size — expanding a preview must scroll the
+        # list, not grow past the visible page (which just clipped before).
+        extras_scroll = Gtk.ScrolledWindow()
+        extras_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        extras_scroll.set_vexpand(True)
+        extras_scroll.set_child(extras_box)
+        self.append(extras_scroll)
 
         # ─── Navigation ──────────────────────────────
         nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         nav_box.set_halign(Gtk.Align.END)
         nav_box.set_margin_top(12)
+        nav_box.set_opacity(0)
 
         back_btn = Gtk.Button(label="  ←  Back  ")
         back_btn.add_css_class("nav-button")
@@ -147,6 +162,9 @@ class ExtrasPage(Gtk.Box):
 
         self.append(nav_box)
 
+        # ─── Entrance animation ───────────────────────
+        stagger_fade_in([title, subtitle, *extra_cards, nav_box], start_delay=80, step=60)
+
     def _create_extra_card(self, extra: ExtraConfig):
         """Create a single extra configuration card."""
         card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -162,10 +180,21 @@ class ExtrasPage(Gtk.Box):
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         info_box.set_hexpand(True)
 
+        title_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        title_row.set_halign(Gtk.Align.START)
+
         title = Gtk.Label(label=extra.title)
         title.add_css_class("extra-title")
         title.set_halign(Gtk.Align.START)
-        info_box.append(title)
+        title_row.append(title)
+
+        detected_badge = Gtk.Label(label="already applied ✓")
+        detected_badge.add_css_class("detected-badge")
+        detected_badge.set_visible(False)
+        title_row.append(detected_badge)
+        self._detected_badges[extra.key] = detected_badge
+
+        info_box.append(title_row)
 
         desc = Gtk.Label(label=extra.description)
         desc.add_css_class("extra-desc")
@@ -193,6 +222,7 @@ class ExtrasPage(Gtk.Box):
         card.append(switch)
 
         self._switches[extra.key] = switch
+        self._cards[extra.key] = card
         return card
 
     def _create_preview_revealer(self, preview_text, extra_key=""):
@@ -262,3 +292,27 @@ class ExtrasPage(Gtk.Box):
         """Continue with selected extras."""
         selected = [e for e in self._extras if e.selected]
         self.on_continue(selected)
+
+    def load_status(self):
+        """Check which extras are already applied and reflect that in the UI,
+        instead of presenting every toggle as if nothing had been done yet."""
+        self.installer.check_extras_status(self._extras, self._on_status_loaded)
+
+    def _on_status_loaded(self, status: dict):
+        """Mark already-applied extras as detected: switch off + locked,
+        card dimmed, badge shown — same convention as the bootstrap page."""
+        for extra in self._extras:
+            if not status.get(extra.key):
+                continue
+
+            switch = self._switches.get(extra.key)
+            card = self._cards.get(extra.key)
+            badge = self._detected_badges.get(extra.key)
+
+            if switch:
+                switch.set_active(False)
+                switch.set_sensitive(False)
+            if card:
+                card.set_opacity(0.6)
+            if badge:
+                badge.set_visible(True)

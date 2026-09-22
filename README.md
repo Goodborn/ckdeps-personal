@@ -12,7 +12,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 
 ## 📋 Package List
 
-### AUR (9)
+### AUR (8)
 | Package | Description |
 |---------|-------------|
 | eden | Modern development tool |
@@ -20,7 +20,6 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 | millennium | Steam skin manager |
 | namida-bin | Beautiful music and video player |
 | opencode-desktop-bin | AI-powered coding assistant |
-| popcorntime | Stream movies |
 | spotiflac-bin | Get Spotify tracks in true FLAC from Tidal, Qobuz & Amazon Music |
 | vm-curator-bin | VM management tool |
 | visual-studio-code-bin | Modern code editor |
@@ -46,7 +45,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 | openrgb | RGB lighting control |
 | zen-browser-bin | Beautifully designed, privacy-focused browser |
 
-### Flatpak (13)
+### Flatpak (11)
 | Package | Description |
 |---------|-------------|
 | AnyDesk | Remote desktop |
@@ -59,8 +58,6 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 | Cine | Video player with a clean interface and MPV-based engine |
 | Kdenlive | Professional video editor |
 | Proton VPN | Secure VPN application |
-| Readest | Modern ebook reader |
-| Rufin | Music client for Jellyfin, Subsonic, and Navidrome |
 | Upscayl | AI image upscaler |
 
 ---

@@ -45,7 +45,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 | openrgb | RGB lighting control |
 | zen-browser-bin | Beautifully designed, privacy-focused browser |
 
-### Flatpak (11)
+### Flatpak (12)
 | Package | Description |
 |---------|-------------|
 | AnyDesk | Remote desktop |
@@ -56,6 +56,7 @@ CKDEPS is a personal initial (fresh install) app to my liking to get Arch-based 
 | Discord | Messaging and voice chat |
 | Foliate | Modern e-book reader |
 | Cine | Video player with a clean interface and MPV-based engine |
+| gImageReader | OCR frontend to tesseract with PDF/image import |
 | Kdenlive | Professional video editor |
 | Proton VPN | Secure VPN application |
 | Upscayl | AI image upscaler |
